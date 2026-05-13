@@ -22,15 +22,30 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install requests
-      - run: python scripts/sync.py --mode full
-      - name: Commit & push
+      - name: Run full sync
+        timeout-minutes: 320
+        continue-on-error: true
+        run: python scripts/sync.py --mode full
+      - name: Commit & push (always)
+        if: always()
         run: |
           git config user.name "usom-bridge-bot"
           git config user.email "noreply@github.com"
-          git add docs/ state/
+          git add docs/ state/ || true
           if git diff --staged --quiet; then
             echo "Degisiklik yok"
           else
             git commit -m "Full sync $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
+          fi
+      - name: Re-trigger if incomplete
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if grep -q '"resume_page"' state/seen_ids.json 2>/dev/null; then
+            echo "Resume_page hala var - full sync bitmedi, tekrar tetikleniyor"
+            gh workflow run sync-full.yml --ref main || echo "Tetikleme basarisiz, manuel re-run gerekebilir"
+          else
+            echo "Full sync tamam"
           fi
