@@ -1,0 +1,7 @@
+{
+  "domain": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+  "url": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+  "ip": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+  "ip6": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+  "ip6net": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null}
+}

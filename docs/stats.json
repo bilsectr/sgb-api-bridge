@@ -1,0 +1,13 @@
+{
+  "last_update_utc": null,
+  "mode": "init",
+  "counts": {"domain": 0, "url": 0, "ip": 0, "ip6": 0, "ip6net": 0},
+  "rejected_this_run": {"domain": 0, "url": 0, "ip": 0, "ip6": 0, "ip6net": 0},
+  "state": {
+    "domain": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+    "url": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+    "ip": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+    "ip6": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null},
+    "ip6net": {"max_id": 0, "last_full_sync": null, "last_delta_sync": null}
+  }
+}

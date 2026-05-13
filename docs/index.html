@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>USOM Bridge - Threat Feed for Firewalls</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { --fg:#111; --muted:#666; --bg:#fafafa; --card:#fff; --acc:#0a66c2; }
+  body { font: 15px/1.55 -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+         color:var(--fg); background:var(--bg); margin:0; padding:2rem 1rem; }
+  main { max-width: 820px; margin: 0 auto; }
+  h1 { margin: 0 0 .3rem; font-size: 1.6rem; }
+  h2 { margin-top: 2rem; font-size: 1.15rem; border-bottom: 1px solid #eee; padding-bottom: .3rem; }
+  .sub { color: var(--muted); margin: 0 0 1.5rem; }
+  a { color: var(--acc); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+              font-size: 13px; }
+  pre { background:#f3f3f3; padding: .8rem; border-radius: 6px; overflow:auto; }
+  ul { padding-left: 1.2rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:.7rem; }
+  .feed { background:#fff; border:1px solid #e5e5e5; border-radius:8px; padding:.8rem 1rem; }
+  .feed .lbl { font-weight: 600; }
+  .feed .url { display:block; font-family: ui-monospace, monospace; font-size: 12px;
+               color: var(--acc); margin-top: .25rem; word-break: break-all; }
+  footer { color: var(--muted); margin-top: 3rem; font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>USOM Bridge</h1>
+  <p class="sub">USOM tehdit beslemesini FortiGate, Sophos, Palo Alto, pfSense vb. guvenlik
+  duvarlarinin dogrudan tuketebilecegi <b>duz metin</b> formatina ceviren acik kaynak araci.</p>
+
+  <h2>Canli besleme URL'leri</h2>
+  <div class="grid">
+    <div class="feed"><span class="lbl">Domain listesi (~450K)</span>
+      <a class="url" href="domain-list.txt">domain-list.txt</a></div>
+    <div class="feed"><span class="lbl">IP listesi (~14K)</span>
+      <a class="url" href="ip-list.txt">ip-list.txt</a></div>
+    <div class="feed"><span class="lbl">URL listesi (~7K)</span>
+      <a class="url" href="url-list.txt">url-list.txt</a></div>
+    <div class="feed"><span class="lbl">IPv6 listesi</span>
+      <a class="url" href="ip6-list.txt">ip6-list.txt</a></div>
+    <div class="feed"><span class="lbl">IPv6 subnet listesi</span>
+      <a class="url" href="ip6net-list.txt">ip6net-list.txt</a></div>
+  </div>
+  <p><a href="stats.json">stats.json</a> &middot; <a href="badge.json">badge.json</a></p>
+
+  <h2>FortiGate ornek konfigurasyonu</h2>
+<pre>config system external-resource
+    edit "USOM-Domain"
+        set type domain
+        set resource "https://sinansh.github.io/usom-bridge/domain-list.txt"
+        set refresh-rate 60
+    next
+    edit "USOM-IP"
+        set type address
+        set resource "https://sinansh.github.io/usom-bridge/ip-list.txt"
+        set refresh-rate 60
+    next
+end</pre>
+
+  <h2>Nasil calisir?</h2>
+  <ul>
+    <li><b>Delta sync</b> saatte bir USOM API'sinin yalniz yeni kayitlarini ceker (~1-3 dk).</li>
+    <li><b>Full sync</b> haftada bir tum kayitlari yeniden ceker (drift duzeltici, ~4 saat).</li>
+    <li>Tum islem GitHub Actions'ta calisir, ciktilar GitHub Pages uzerinden Fastly CDN ile dagitilir.</li>
+    <li>Veri kaynagi: <a href="https://www.usom.gov.tr/api/address/index">USOM Open Threat Feed API</a></li>
+  </ul>
+
+  <h2>Sorumluluk reddi</h2>
+  <p>Bu proje USOM ile resmi bir bagi olmayan, kar amaci gutmeyen, acik kaynak bir aractir.
+     Veriler "as-is" sunulur.</p>
+
+  <footer>
+    Kaynak kod: <a href="https://github.com/sinansh/usom-bridge">github.com/sinansh/usom-bridge</a>
+  </footer>
+</main>
+</body>
+</html>
