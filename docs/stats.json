@@ -1,43 +1,43 @@
 {
-  "last_update_utc": "2026-05-14T09:12:37.727193+00:00",
+  "last_update_utc": "2026-05-14T11:24:29.884635+00:00",
   "mode": "delta",
   "counts": {
-    "domain": 450809,
+    "domain": 450858,
     "url": 6927,
-    "ip": 14210,
+    "ip": 14211,
     "ip6": 6,
     "ip6net": 0
   },
   "in_progress": null,
   "state": {
     "domain": {
-      "max_id": 1117730,
+      "max_id": 1117830,
       "last_full_sync": "2026-05-14T05:53:45.489337+00:00",
-      "last_delta_sync": "2026-05-14T09:12:29.458715+00:00",
-      "total_count": 450978
+      "last_delta_sync": "2026-05-14T11:24:14.628922+00:00",
+      "total_count": 451026
     },
     "url": {
       "max_id": 851416,
       "last_full_sync": "2026-05-14T06:02:45.298069+00:00",
-      "last_delta_sync": "2026-05-14T09:12:32.606772+00:00",
+      "last_delta_sync": "2026-05-14T11:24:22.804943+00:00",
       "total_count": 6927
     },
     "ip": {
-      "max_id": 1117488,
+      "max_id": 1117732,
       "last_full_sync": "2026-05-14T06:21:20.407034+00:00",
-      "last_delta_sync": "2026-05-14T09:12:36.034983+00:00",
-      "total_count": 14210
+      "last_delta_sync": "2026-05-14T11:24:27.608903+00:00",
+      "total_count": 14211
     },
     "ip6": {
       "max_id": 780782,
       "last_full_sync": "2026-05-14T06:21:20.891481+00:00",
-      "last_delta_sync": "2026-05-14T09:12:37.199945+00:00",
+      "last_delta_sync": "2026-05-14T11:24:28.603868+00:00",
       "total_count": 6
     },
     "ip6net": {
       "max_id": 0,
       "last_full_sync": "2026-05-14T06:21:21.347690+00:00",
-      "last_delta_sync": "2026-05-14T09:12:37.660466+00:00",
+      "last_delta_sync": "2026-05-14T11:24:29.818969+00:00",
       "total_count": 0
     }
   }
