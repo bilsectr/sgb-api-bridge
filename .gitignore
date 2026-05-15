@@ -6,3 +6,6 @@ venv/
 .env
 .DS_Store
 *.log
+# SQLite WAL/SHM gecici dosyalar (sadece sgb.db commit edilir)
+*.db-wal
+*.db-shm

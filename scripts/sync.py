@@ -11,6 +11,13 @@ Modlar:
     --mode loop         : Container'lar icin: delta'yi sureki tetikler, N delta'da bir
                           full reconcile calistirir (SGB_BRIDGE_RECONCILE_EVERY).
     --mode healthcheck  : stats.json fresh mi diye bakar (delta workflow'da kullaniliyor).
+    --mode catalog-sync : 3 lookup endpoint'ini (category/source/connection-type) DB'ye yazar.
+
+Storage:
+    docs/*-list.txt  : geriye uyumlu duz metin feed (degismedi).
+    state/sgb.db     : zengin SQLite store (id, category, connectiontype, source,
+                       criticality_level, first/last_seen, removed_at). SIEM
+                       export'lari (Faz 1+) bu DB'den uretilir.
 
 API:
     GET https://siberguvenlik.gov.tr/api/address/index?type={domain|url|ip|ip6|ip6net}&page=N&per-page=K
@@ -33,9 +40,18 @@ from pathlib import Path
 
 import requests
 
-__version__ = "2.0.0"
+import sgb_db
+
+__version__ = "2.1.0"
 
 API_URL = "https://siberguvenlik.gov.tr/api/address/index"
+CATALOG_ENDPOINTS = {
+    # API kayit alani 'desc' -> bu lookup endpoint: address-description
+    # (SGB taksonomisinde "description" denir; kayitta tek harfli kod: PH/MD/MI/MU/MC/BP/CA)
+    "description":    "https://siberguvenlik.gov.tr/api/address-description/index",
+    "source":         "https://siberguvenlik.gov.tr/api/address-source/index",
+    "connectiontype": "https://siberguvenlik.gov.tr/api/address-connection-type/index",
+}
 TYPES = ("domain", "url", "ip", "ip6", "ip6net")
 # API per-page parametresi: tek istekte donen kayit sayisi. pratikte 10000 bile kabul ediliyor. 1000 muhafazakar bir varsayilan: full sync
 # domain icin 22562 -> 452 sayfaya duser (~50x daha az istek).
@@ -198,8 +214,11 @@ def final_path(typ: str) -> Path:
     return DOCS_DIR / f"{typ}-list.txt"
 
 
-def append_to_partial(typ: str, records: list) -> tuple:
-    """Records'lari partial dosyaya yazar; (yazilan, atilan, max_id) doner."""
+def append_to_partial(typ: str, records: list, conn=None) -> tuple:
+    """Records'lari partial dosyaya yazar; (yazilan, atilan, max_id) doner.
+
+    conn verilirse ayni records DB'ye de upsert edilir (dual-write).
+    """
     written = 0
     skipped = 0
     max_id = 0
@@ -218,6 +237,8 @@ def append_to_partial(typ: str, records: list) -> tuple:
                 written += 1
             else:
                 skipped += 1
+    if conn is not None and records:
+        sgb_db.upsert_indicators(conn, records, typ, clean_entry, valid_for)
     return written, skipped, max_id
 
 
@@ -234,12 +255,23 @@ def finalize_partial(typ: str) -> int:
     return len(lines)
 
 
-def _sync_full(session: requests.Session, typ: str, state: dict) -> int:
-    """Full sync: resume-capable. Return: bu run'da yazilan satir sayisi (partial'a)."""
+def _sync_full(session: requests.Session, typ: str, state: dict, conn=None) -> int:
+    """Full sync: resume-capable. Return: bu run'da yazilan satir sayisi (partial'a).
+
+    conn verilirse her sayfa DB'ye de upsert edilir; finalize'da bu run'in
+    cutoff'undan eski (= bu run'da gorulmeyen) kayitlar removed_at damgalanir.
+    """
     tstate = state.setdefault(typ, {"max_id": 0, "last_full_sync": None, "last_delta_sync": None})
     resume_page = int(tstate.get("resume_page") or 0)
     max_known = int(tstate.get("max_id") or 0)
     partial_exists = partial_path(typ).exists()
+    # Reconcile cutoff: resume durumunda onceki run'in cutoff'unu kullan, yoksa simdi.
+    # Kayitli cutoff yalniz partial dosyasi mevcutsa anlamli (resume).
+    if resume_page > 0 and tstate.get("full_run_started_utc"):
+        cutoff_utc = tstate["full_run_started_utc"]
+    else:
+        cutoff_utc = datetime.now(timezone.utc).isoformat()
+        tstate["full_run_started_utc"] = cutoff_utc
 
     # Partial dosyayi ASLA silme. Duplicate ekleme zararsiz (dedupe en sonda).
     # State kaybolsa bile partial korunsun.
@@ -260,7 +292,7 @@ def _sync_full(session: requests.Session, typ: str, state: dict) -> int:
     written_total = 0
 
     if resume_page <= 1:
-        w, s, mid = append_to_partial(typ, first.get("models") or [])
+        w, s, mid = append_to_partial(typ, first.get("models") or [], conn=conn)
         written_total += w
         if mid > max_known:
             max_known = mid
@@ -282,7 +314,7 @@ def _sync_full(session: requests.Session, typ: str, state: dict) -> int:
         if not recs:
             log.info(f"[{typ}] page={page} bos - bitti")
             break
-        w, s, mid = append_to_partial(typ, recs)
+        w, s, mid = append_to_partial(typ, recs, conn=conn)
         written_total += w
         if mid > max_known:
             max_known = mid
@@ -300,12 +332,20 @@ def _sync_full(session: requests.Session, typ: str, state: dict) -> int:
     tstate["max_id"] = max_known
     tstate["last_full_sync"] = datetime.now(timezone.utc).isoformat()
     tstate.pop("resume_page", None)
+    tstate.pop("full_run_started_utc", None)
+    if conn is not None:
+        removed = sgb_db.mark_removed_by_cutoff(conn, typ, cutoff_utc)
+        if removed:
+            log.info(f"[{typ}] FULL reconcile: {removed} kayit removed_at damgalandi")
     log.info(f"[{typ}] FULL tamamlandi: {line_count} benzersiz satir, max_id={max_known}")
     return written_total
 
 
-def _sync_delta(session: requests.Session, typ: str, state: dict) -> int:
-    """Delta sync: max_id'den buyuk kayitlari ceker, mevcut dosyaya ekler. Return: eklenen sayi."""
+def _sync_delta(session: requests.Session, typ: str, state: dict, conn=None) -> int:
+    """Delta sync: max_id'den buyuk kayitlari ceker, mevcut dosyaya ekler. Return: eklenen sayi.
+
+    conn verilirse yeni kayitlar DB'ye de upsert edilir.
+    """
     tstate = state.setdefault(typ, {"max_id": 0, "last_full_sync": None, "last_delta_sync": None})
     max_known = int(tstate.get("max_id") or 0)
 
@@ -358,6 +398,8 @@ def _sync_delta(session: requests.Session, typ: str, state: dict) -> int:
         if valid_for(cleaned, typ) and cleaned not in existing:
             existing.add(cleaned)
             added += 1
+    if conn is not None and new_records:
+        sgb_db.upsert_indicators(conn, new_records, typ, clean_entry, valid_for)
 
     final_path(typ).write_text(
         "\n".join(sorted(existing)) + ("\n" if existing else ""), encoding="utf-8"
@@ -384,15 +426,64 @@ def write_stats(mode: str, state: dict) -> None:
             counts[typ] = 0
     in_progress = {typ: state.get(typ, {}).get("resume_page") for typ in TYPES
                    if state.get(typ, {}).get("resume_page")}
+    db_block = _db_stats_block()
     stats = {
         "last_update_utc": datetime.now(timezone.utc).isoformat(),
         "mode": mode,
         "counts": counts,
         "in_progress": in_progress or None,
         "state": state,
+        "db": db_block,
     }
     (DOCS_DIR / "stats.json").write_text(json.dumps(stats, indent=2), encoding="utf-8")
-    log.info(f"stats: {counts} in_progress={in_progress or 'none'}")
+    log.info(f"stats: {counts} in_progress={in_progress or 'none'} db={db_block.get('total_active') if db_block else 'n/a'}")
+
+
+def _db_stats_block() -> dict | None:
+    """stats.json icin DB ozetini hazirlar (varsa). Hata olursa None doner."""
+    db_file = sgb_db.db_path(ROOT)
+    if not db_file.exists():
+        return None
+    try:
+        conn = sgb_db.connect(ROOT)
+        try:
+            per_type = sgb_db.counts_by_type(conn)
+            total_active = sum(per_type.values())
+            removed = conn.execute(
+                "SELECT COUNT(*) FROM indicators WHERE removed_at_utc IS NOT NULL"
+            ).fetchone()[0]
+            by_ct = dict(
+                conn.execute(
+                    """
+                    SELECT connectiontype, COUNT(*)
+                      FROM indicators
+                     WHERE removed_at_utc IS NULL AND valid = 1 AND connectiontype IS NOT NULL
+                     GROUP BY connectiontype
+                    """
+                ).fetchall()
+            )
+            by_cat = dict(
+                conn.execute(
+                    """
+                    SELECT category, COUNT(*)
+                      FROM indicators
+                     WHERE removed_at_utc IS NULL AND valid = 1 AND category IS NOT NULL
+                     GROUP BY category
+                    """
+                ).fetchall()
+            )
+            return {
+                "per_type_active": per_type,
+                "total_active": total_active,
+                "removed": removed,
+                "by_connectiontype": by_ct,
+                "by_category": by_cat,
+            }
+        finally:
+            conn.close()
+    except Exception as e:
+        log.warning(f"db stats okunamadi: {e}")
+        return None
 
 
 def sync(mode: str) -> None:
@@ -407,16 +498,64 @@ def sync(mode: str) -> None:
             f"final_exists={final_path(t).exists()}"
         )
     session = requests.Session()
+    conn = sgb_db.connect(ROOT)
+    run_id = sgb_db.start_run(conn, mode)
+    ok = False
+    err = None
     try:
         for typ in TYPES:
             if mode == "full":
-                _sync_full(session, typ, state)
+                _sync_full(session, typ, state, conn=conn)
             else:
-                _sync_delta(session, typ, state)
+                _sync_delta(session, typ, state, conn=conn)
             save_state(state)
+        ok = True
+    except Exception as e:
+        err = repr(e)
+        raise
     finally:
         save_state(state)
         write_stats(mode, state)
+        try:
+            db_counts = sgb_db.counts_by_type(conn)
+            log.info(f"db counts (valid, not removed): {db_counts}")
+            sgb_db.finish_run(conn, run_id, ok, counts=db_counts, error=err)
+        finally:
+            conn.close()
+
+
+def catalog_sync() -> None:
+    """3 lookup endpoint'i (category/source/connectiontype) DB'ye yazar.
+
+    Bunlar siklikla degismez; haftalik veya release oncesi calistirmak yeter.
+    """
+    log.info("== CATALOG sync basliyor ==")
+    session = requests.Session()
+    conn = sgb_db.connect(ROOT)
+    run_id = sgb_db.start_run(conn, "catalog")
+    counts = {}
+    ok = False
+    err = None
+    try:
+        for kind, url in CATALOG_ENDPOINTS.items():
+            r = session.get(
+                url,
+                timeout=TIMEOUT,
+                headers={"User-Agent": UA, "Accept": "application/json"},
+            )
+            r.raise_for_status()
+            data = r.json()
+            models = data.get("models") or []
+            n = sgb_db.upsert_catalog(conn, kind, models)
+            counts[kind] = n
+            log.info(f"[catalog:{kind}] {n} kayit yazildi")
+        ok = True
+    except Exception as e:
+        err = repr(e)
+        raise
+    finally:
+        sgb_db.finish_run(conn, run_id, ok, counts=counts, error=err)
+        conn.close()
 
 
 def loop() -> None:
@@ -483,11 +622,17 @@ def health_check() -> int:
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--mode", choices=["full", "delta", "loop", "healthcheck"], required=True)
+    p.add_argument(
+        "--mode",
+        choices=["full", "delta", "loop", "healthcheck", "catalog-sync"],
+        required=True,
+    )
     args = p.parse_args()
     if args.mode == "healthcheck":
         sys.exit(health_check())
     if args.mode == "loop":
         loop()
+    elif args.mode == "catalog-sync":
+        catalog_sync()
     else:
         sync(args.mode)
