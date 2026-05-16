@@ -260,6 +260,7 @@
     <a class="navlink" href="#feeds">Feed URL'leri</a>
     <a class="navlink" href="#deploy">Kurulum</a>
     <a class="navlink" href="#firewalls">Firewall entegrasyonu</a>
+    <a class="navlink" href="#siem">SIEM Pack</a>
     <a class="navlink" href="#how">Nasıl çalışır</a>
     <span class="spacer"></span>
     <button class="theme-toggle" id="theme-toggle" aria-label="Tema değiştir" title="Tema değiştir">
@@ -300,6 +301,7 @@
       <li><a href="#feeds">Canlı feed URL'leri</a></li>
       <li><a href="#deploy">Dağıtım seçenekleri (4 model)</a></li>
       <li><a href="#firewalls">Firewall / cihaz entegrasyonu</a></li>
+      <li><a href="#siem">SIEM Pack (QRadar, Splunk, STIX 2.1)</a></li>
       <li><a href="#how">Nasıl çalışır?</a></li>
     </ul>
   </div>
@@ -726,6 +728,76 @@ http_access deny sgb_blacklist
 /system scheduler add name=sgb-hourly interval=1h on-event=sgb-sync</code></pre>
       <p>Sonra <code>/ip firewall filter</code>'da <code>src-address-list=SGB</code> /
         <code>dst-address-list=SGB</code> ile drop kuralı ekleyin.</p>
+    </div>
+  </section>
+
+  <section id="siem">
+    <h2>SIEM Pack <span class="hash" style="font-size:.7em">— QRadar · Splunk · STIX 2.1</span></h2>
+    <p class="section-sub">
+      SGB indicator'larini sadece firewall'da bloklamak istemiyor, SIEM'inizde
+      <strong>kural yazmak, alarm uretmek, rapor cikarmak</strong> istiyorsaniz: ayni feed'in
+      zenginlestirilmis hali — <code>connectiontype</code>, <code>description</code>,
+      <code>criticality_level</code>, <code>source</code> alanlariyla — QRadar Reference Set/Map,
+      Splunk Lookup TA ve vendor-agnostik STIX 2.1 bundle olarak hazirdir.
+    </p>
+
+    <div class="deploy-grid">
+      <div class="deploy">
+        <div class="icon">🛡️</div>
+        <span class="pill">Reference Set + Map</span>
+        <h3>IBM QRadar</h3>
+        <p>10 reference set + 5 reference map otomatik uretilir, REST API ile push edilir.
+          3 baslangic rule + AQL test paketi + gunluk rapor.</p>
+        <a href="integrations/qradar.md">Kurulum (15 dk) →</a>
+      </div>
+      <div class="deploy">
+        <div class="icon">🔎</div>
+        <span class="pill">TA paketi</span>
+        <h3>Splunk</h3>
+        <p><code>TA-sgb-threatintel.tar.gz</code>: 3 lookup, otomatik enrichment,
+          3 saved search + overview dashboard. Restart-suz lookup refresh.</p>
+        <a href="integrations/splunk.md">Kurulum (10 dk) →</a>
+      </div>
+      <div class="deploy">
+        <div class="icon">🧬</div>
+        <span class="pill">STIX 2.1 standard</span>
+        <h3>MISP / OpenCTI / Sentinel</h3>
+        <p>Per-type STIX 2.1 bundle: identity + indicator + deterministik UUID +
+          source-bazli confidence + zengin <code>x_sgb_*</code> alanlari.</p>
+        <a href="integrations/README.md">Tum entegrasyonlar →</a>
+      </div>
+      <div class="deploy">
+        <div class="icon">📚</div>
+        <span class="pill">20 use case</span>
+        <h3>Use Case kutuphanesi</h3>
+        <p>PH/BC/AC/EK/MF/MM/MC/OT + cross-category. Her use case vendor-agnostik
+          tanim + QRadar/Splunk implementasyon pointer'i + MITRE mapping + FP notlari.</p>
+        <a href="usecases/">Kutuphaneye git →</a>
+      </div>
+    </div>
+
+    <h3 style="margin-top:1.6rem">Kurulum hizi</h3>
+<pre><code># Tek sefer: SQLite'i doldur (~10-15 dk)
+python scripts/sync.py --mode catalog-sync
+python scripts/sync.py --mode full
+
+# Artifact'lari uret
+python scripts/export.py              # feeds/ - master CSV + JSONL + STIX
+python scripts/build_pack.py          # QRadar reference set/map CSV'leri
+python scripts/build_splunk_ta.py     # Splunk TA tarball'i
+
+# Push (QRadar)
+export SGB_QRADAR_HOST=qradar.kurum.local SGB_QRADAR_TOKEN=...
+python scripts/push_to_qradar.py --pack siem/qradar/out
+
+# Install (Splunk)
+$SPLUNK_HOME/bin/splunk install app siem/splunk/out/TA-sgb-threatintel.tar.gz</code></pre>
+
+    <div class="callout">
+      <strong>Severity matrisi:</strong> Her iki SIEM aynı formülü kullanır —
+      <code>connectiontype × criticality_level</code> → 1-10 severity. APT C&amp;C eslesmesi
+      her zaman 10 (P1), Mining eslesmesi 3 (policy). Tek kaynak:
+      <a href="https://github.com/bilsectr/sgb-api-bridge/blob/main/siem/qradar/severity-matrix.md" target="_blank" rel="noopener">severity-matrix.md</a>.
     </div>
   </section>
 
