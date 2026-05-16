@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -n '40,170p' /tmp/bg_rehber.txt)"
+    ]
+  }
+}

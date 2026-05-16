@@ -1,39 +1,76 @@
-# UC-XX-NNN — <Kisa baslik>
+# UC-XX-NNN — <Kısa Türkçe Başlık>
 
-| Alan          | Deger |
-|---------------|-------|
-| ID            | UC-XX-NNN |
-| Title         | (insan-okunabilir baslik) |
-| MITRE         | TAxxxx / Txxxx |
-| Connectiontype| <PH/BC/AC/EK/MF/MM/MC/OT/XX> |
-| Severity base | 1-10 (severity-matrix.md formulu uygulanir) |
-| Data sources  | (DNS, Proxy, Firewall, EDR, Email, MDM, ...) |
-| Reference     | SGB_<CT>_<TYPE>, SGB_<TYPE>_MAP |
-| Response      | PB-XX-NNN (varsa) |
+> **TL;DR:** 1-2 cümlelik özet. Bu use case neyi yakalar, kim için değerli?
 
-## Detection logic (vendor-agnostik)
+## Bu use case nedir? (Basit anlatım)
 
-(Bir paragraf + opsiyonel pseudo-code. Hangi alan hangi feed'e karsi
-matchlenir, hangi filtreler uygulanir, hangi suppress mantigi var.)
+(2-4 paragraf, teknik olmayan da anlasın. Hangi senaryo, hangi log
+kaynağında, hangi SGB feed alanı, nasıl korelasyon.)
 
-## QRadar
+## Senaryo (Hikâye)
+
+(Zaman çizelgeli somut bir örnek olay. 4-6 satır. Saatler kullan.)
+
+## BG Rehberi karşılığı
+
+| Madde | Madde adı | Bu UC ne sağlar? |
+|-------|-----------|-------------------|
+| **3.x.y.z** | ... | ... |
+| **3.1.10.4** | Siber Tehdit Bildirimlerinin Yönetilmesi | SGB feed kullanımı (her UC ortak). |
+| **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | SIEM korelasyon (her UC ortak). |
+
+## Teknik özet
+
+| Alan | Değer |
+|------|-------|
+| ID | UC-XX-NNN |
+| MITRE ATT&CK | TAxxxx / Txxxx |
+| Connectiontype | PH/BC/AC/EK/MF/MM/MC/OT/XX |
+| Severity (base) | 1-10 (severity-matrix.md formülü) |
+| Veri kaynakları | (DNS, Proxy, Firewall, EDR, Email, MDM, ...) |
+| Reference / lookup | `SGB_<CT>_<TYPE>`, `SGB_<TYPE>_MAP` |
+| Response | PB-XX-NNN (varsa) |
+
+## Tespit mantığı (vendor-bağımsız)
+
+```text
+when <event geldi>
+  AND <SGB lookup eşleşti>
+  AND <ek filter>
+then <aksiyon>
+```
+
+## QRadar uygulaması
 
 - Reference set/map: `SGB_*`
-- Rule turu: Event Rule / Flow Rule / Common Rule
+- Rule türü: Event Rule / Flow Rule / Common Rule
 - AQL test: [siem/qradar/aql/uc-xx-nnn-test.aql](../../siem/qradar/aql/)
 
-## Splunk
+```
+when ...
+```
+
+## Splunk uygulaması
 
 - Saved search: `SGB - UC-XX-NNN - <title>`
-- Macro: `sgb_<name>_search` (siem/splunk/TA-sgb-threatintel/default/macros.conf)
-- Lookup: sgb_<ip|domain|url>.csv
+- Macro: `sgb_<name>_search`
+- Lookup: `sgb_<ip|domain|url>.csv`
 
-## False positive notlari
+```spl
+...
+```
 
-- (Bilinen FP kaynaklari + suppress/exception onerileri)
-- Source=IH icin guvenirlik dusurme stratejisi
+## Yanlış pozitif (False Positive) notları
 
-## Response playbook
+- Bilinen FP kaynakları + suppress/exception önerileri
+- `source=IH` için güvenirlik düşürme stratejisi
 
-- (PB-XX-NNN'a referans, varsa)
-- Manuel triage adimlari, otomasyona uygunluk degerlendirmesi
+## Olay müdahale (Response playbook)
+
+**Otomatik adımlar:**
+1. ...
+
+**Manuel triage adımları:**
+1. ...
+
+**SGB raporlama etkisi (3.1.10.5):** (varsa)

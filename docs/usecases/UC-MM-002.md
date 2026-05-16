@@ -1,34 +1,82 @@
-# UC-MM-002 — CPU spike + SGB MM indicator hit (composite)
+# UC-MM-002 — CPU Yükü Yüksek + SGB MM Eşleşmesi (Composite)
 
-| Alan          | Deger |
-|---------------|-------|
-| ID            | UC-MM-002 |
-| MITRE         | TA0040 / T1496 |
-| CT            | MM (composite) |
-| Severity base | 5 (UC-MM-001'i upgrade eden composite) |
-| Data sources  | EDR perf telemetry / OS metrics + SGB MM hit (UC-MM-001) |
-| Reference     | `SGB_MM_IP`, `SGB_MM_DOMAIN` |
+> **TL;DR:** UC-MM-001 sadece "mining IP'sine bağlanıyor" der.
+> UC-MM-002: bağlanma + aynı zamanda CPU sürekli %85+ + ağ çıkışının
+> %20+'sı mining destination'ına → aktif mining'in kanıtı. Severity 5.
 
-## Detection logic
+## Bu use case nedir? (Basit anlatım)
 
-UC-MM-001 alone is policy-grade; composite mantik:
-- 5 dk icinde host'tan SGB_MM_* hit
-- Ayni hostta son 1 saatte CPU avg > %85 (vs baseline)
-- Network egress'in %20'sinden fazlasi mining destination'a
+Mining yapıyorsa belirti:
+1. Mining pool'a sürekli bağlantı (UC-MM-001 yakalar).
+2. CPU yüksek kalır (mining hesaplama yapar).
+3. Bandwidth küçük ama sürekli (job/result paketleri).
 
-Composite match = aktif mining process kesinligi yuksek.
+EDR/OS metric (perf telemetry) ile SGB MM hit composite olunca aktif
+mining kesinleşir. Severity 5 — politika dışı resource kullanımı + ciddi
+performans etkisi.
 
-## QRadar
+## Senaryo (Hikâye)
 
-- Common Rule combining UC-MM-001 + EDR custom event "high CPU asset"
-- Time correlation: 1 hour window, same asset
+- 14:00-15:00 — `LIN-PROD-09` üzerinde CPU avg %92 (baseline %15).
+- Aynı pencerede 80% network egress mining pool IP'sine.
+- 15:00:15 — Composite alarm: severity 5, IR ticket P3.
 
-## Splunk
+## BG Rehberi karşılığı
 
-- Saved search: join EDR perf + sgb_dest_ct="MM"
-- `| stats values(perf.cpu_pct) AS cpu by host | where cpu > 85`
+| Madde | Madde adı | Bu UC ne sağlar? |
+|-------|-----------|-------------------|
+| **3.1.5.1** | Zararlı Yazılımdan Korunma | Cryptojacking aktif → EDR doğrulamalı kanıt. |
+| **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | Perf + network korelasyonu. |
+| **3.1.10.8** | Siber Olay Puanlama ve Önceliklendirme | Composite → puan yükseltilir. |
 
-## False positives
+## Teknik özet
 
-- ML training, video render -> exception by asset role
-- Build server CPU spikes -> exception
+| Alan | Değer |
+|------|-------|
+| ID | UC-MM-002 |
+| MITRE | TA0040 / T1496 |
+| Connectiontype | MM (composite) |
+| Severity (base) | 5 |
+| Veri kaynakları | EDR perf telemetry / OS metrics + UC-MM-001 (SGB MM hit) |
+| Reference / lookup | `SGB_MM_IP`, `SGB_MM_DOMAIN` |
+
+## Tespit mantığı
+
+```text
+window = 1 saat
+condition:
+  same host AND SGB_MM_* hit (within last 5 min)
+  AND avg CPU pct > 85 (vs baseline)
+  AND % egress to mining_destination > 20
+=> escalate
+```
+
+## QRadar / Splunk
+
+**QRadar:** Common Rule combining UC-MM-001 + EDR custom event
+"high CPU asset"; time correlation 1 saat, same asset.
+
+**Splunk:** Saved search joining EDR perf index + `sgb_dest_ct="MM"`.
+
+```spl
+`sgb_edr_perf_index` earliest=-1h
+| stats avg(cpu_pct) AS avg_cpu by host
+| where avg_cpu > 85
+| join host [search `sgb_notable_index` sgb_ct="MM" earliest=-5m | stats count by host]
+```
+
+## Yanlış pozitif notları
+
+- **ML training, video render, build server** → exception by asset role.
+- **Sintetik load test** → exception when scheduled.
+
+## Olay müdahale (PB-MM-002)
+
+**Otomatik:**
+1. Process kill (eğer policy izin veriyorsa).
+2. IR ticket P3.
+
+**Manuel:**
+1. Mining binary nerede? Persistence var mı?
+2. Imaj/container ise → registry malware kontrolü.
+3. Aynı imajdan başka host çalışıyor mu? Geniş tarama.
