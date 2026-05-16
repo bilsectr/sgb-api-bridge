@@ -30,7 +30,7 @@ services:
       - CONNECTOR_SCOPE=identity,indicator,bundle
       - CONNECTOR_CONFIDENCE_LEVEL=70
       - CONNECTOR_LOG_LEVEL=info
-      - EXTERNAL_IMPORT_FILE_STIX_URL=https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json
+      - EXTERNAL_IMPORT_FILE_STIX_URL=https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json
       - EXTERNAL_IMPORT_FILE_STIX_INTERVAL=60   # dakika
     restart: always
   # Ayni sablon: sgb-url, sgb-ip, sgb-ip6, sgb-ip6net

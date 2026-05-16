@@ -143,4 +143,7 @@ jobs:
           files: release-assets/*
           draft: false
           prerelease: false
+          # Stable tag her zaman /releases/latest semantigine sahip olsun
+          # (rolling 'feeds-latest' prerelease=true ile bunu zaten ihlal etmiyor).
+          make_latest: 'true'
           fail_on_unmatched_files: true

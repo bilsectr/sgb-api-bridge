@@ -58,7 +58,7 @@ Azure AD'de yeni app:
             "type": "Http",
             "inputs": {
               "method": "GET",
-              "uri": "https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-@{item()}.stix2.json"
+              "uri": "https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-@{item()}.stix2.json"
             }
           },
           "Submit_to_TI_API": {

@@ -56,7 +56,7 @@ Import-Csv feeds/sgb-master.csv | ForEach-Object {
 Cortex XSOAR'da:
 
 1. **Settings > Integrations** > "Generic STIX Feed"
-2. URL: `https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json` (her tip icin ayri instance)
+2. URL: `https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json` (her tip icin ayri instance)
 3. Fetch interval: 60 dakika
 4. Indicator types map:
    - `domain-name` -> `Domain`
@@ -79,7 +79,7 @@ https://taxii.bilsectr.github.io/api/v21/collections/sgb-{type}/objects/
 
 ```bash
 # Suricata IP-only ruleset - Release tarball'indan tek dosya cek
-curl -sLO https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-feeds.tar.gz
+curl -sLO https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-feeds.tar.gz
 tar -xzf sgb-feeds.tar.gz feeds/by-connectiontype/bc-ip.txt \
   -O > /etc/suricata/rules/sgb-bc-ip.txt
 rm sgb-feeds.tar.gz
@@ -127,7 +127,7 @@ import requests
 def lookup_indicator(value, typ):
     # Tek bir indicator icin remote canli lookup; production'da local cache (ustteki ornek) tercih edin.
     # Bu yontem her cagiri 50KB-5MB indirir; rate-limit dostu degil.
-    url = f"https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-feeds.tar.gz"
+    url = f"https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-feeds.tar.gz"
     # Pratikte: bir kez indir, extract et, in-memory tut (yukaridaki cache patern).
     raise NotImplementedError("Production'da yukaridaki cached fonksiyonu kullan")
 ```

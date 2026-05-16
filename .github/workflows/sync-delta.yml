@@ -99,3 +99,58 @@ jobs:
             siem/splunk/out/manifest.json
           retention-days: 30
           if-no-files-found: ignore
+
+      # --- Rolling 'feeds-latest' release: SIEM tuketicileri saatlik tazelenmis
+      # artifact'lara kalici URL ile erissin diye. prerelease=true + make_latest=false
+      # ile bu release'in /releases/latest semantigini caldirmamasini garanti ediyoruz.
+      # Stabil 'latest' her zaman release-siem-pack.yml ile basilan v*X.Y.Z tag'i kalir.
+
+      - name: Prepare rolling release assets
+        if: success() && hashFiles('feeds/index.json') != ''
+        run: |
+          mkdir -p release-assets
+          tar -czf release-assets/sgb-feeds.tar.gz feeds/
+          tar -czf release-assets/sgb-qradar-pack.tar.gz -C siem/qradar/out .
+          cp siem/splunk/out/TA-sgb-threatintel.tar.gz release-assets/
+          cp feeds/stix/sgb-*.stix2.json release-assets/ 2>/dev/null || true
+          cp feeds/index.json release-assets/feeds-index.json
+          cp siem/qradar/out/manifest.json release-assets/qradar-manifest.json
+          cp siem/splunk/out/manifest.json release-assets/splunk-manifest.json
+          ( cd release-assets && sha256sum * > SHA256SUMS )
+          echo "HEAD_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "BUILT_AT=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_ENV"
+          ls -lh release-assets/
+
+      - name: Publish rolling release 'feeds-latest'
+        if: success() && hashFiles('release-assets/SHA256SUMS') != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: feeds-latest
+          name: "SGB SIEM Pack — rolling (saatlik delta)"
+          target_commitish: ${{ env.HEAD_SHA }}
+          prerelease: true
+          make_latest: 'false'
+          body: |
+            **Rolling release — saatlik delta sync sonrasi otomatik yenilenir.**
+            Bu release her saat silinip yeniden olusturulur; URL'ler ayni kalir,
+            icerikleri saatte bir guncellenir.
+
+            - Built (UTC): `${{ env.BUILT_AT }}`
+            - Commit: `${{ env.HEAD_SHA }}`
+            - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            ### Kalici URL'ler (her saat tazelenir)
+
+            ```
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-feeds.tar.gz
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-qradar-pack.tar.gz
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/TA-sgb-threatintel.tar.gz
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-domain.stix2.json
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-url.stix2.json
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-ip.stix2.json
+            https://github.com/${{ github.repository }}/releases/download/feeds-latest/SHA256SUMS
+            ```
+
+            Stabil snapshot icin: ${{ github.server_url }}/${{ github.repository }}/releases/latest
+          files: release-assets/*
+          fail_on_unmatched_files: false

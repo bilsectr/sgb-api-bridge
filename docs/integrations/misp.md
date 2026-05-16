@@ -19,9 +19,9 @@ GitHub Pages'a commit edilmez (~150MB bundle, repo bloat olmasin diye).
 Kalici "latest" URL'leri:
 
 ```
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-url.stix2.json
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-ip.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-url.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-ip.stix2.json
 ```
 
 (Versiyon kilitlemek: `releases/download/v<X.Y.Z>/sgb-domain.stix2.json`)
@@ -40,7 +40,7 @@ UI: **Sync Actions > List Feeds > Add Feed**
 | Caching enabled | ✓ |
 | Name | SGB STIX 2.1 — Domain |
 | Provider | Siber Guvenlik Baskanligi |
-| URL | `https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json` |
+| URL | `https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json` |
 | Source format | STIX 2.x JSON |
 | Default tag | `tlp:white`, `sgb:domain` |
 | Lookup visible | ✓ |
@@ -58,7 +58,7 @@ curl -k -X POST "https://$MISP/feeds/add" \
   -d '{"Feed": {
     "name": "SGB STIX 2.1 - Domain",
     "provider": "SGB",
-    "url": "https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json",
+    "url": "https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json",
     "enabled": true,
     "source_format": "stix",
     "input_source": "network",

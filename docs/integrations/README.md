@@ -36,23 +36,29 @@ siem/qradar/out/                           # QRadar bootstrap CSV'leri (build_pa
 siem/splunk/out/TA-sgb-threatintel.tar.gz  # Splunk TA paketi
 ```
 
-**Kalici remote URL'ler** (GitHub Release `latest/download`) — bu URL'leri
-SIEM/TIP konfiglerinde dogrudan kullanabilirsiniz (idempotent, versiyonlu,
-SHA256 dogrulanabilir):
+**Iki kalici URL kanali** — ihtiyaca gore secin:
+
+| Kanal | URL formati | Yenilenme | Kullanim |
+|-------|-------------|-----------|----------|
+| **Rolling** (SIEM ingest icin onerilen) | `releases/download/feeds-latest/<file>` | **Saatlik** (her delta sync sonrasi) | Sentinel/MISP/Splunk/QRadar pipeline'i hep taze veri ister |
+| **Stable snapshot** | `releases/latest/download/<file>` | Manuel `v*X.Y.Z` tag push'unda | Versiyon audit gerektigi, "bu pack'i deploy ettik" denmesi gereken durumlar |
+| **Versiyon kilitli** | `releases/download/v<X.Y.Z>/<file>` | Sabit | Spesifik snapshot'a kilitlemek istersen |
+
+Rolling URL'ler (her saat yeniden uretilir, URL'ler ayni kalir):
 
 ```
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-feeds.tar.gz
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-qradar-pack.tar.gz
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/TA-sgb-threatintel.tar.gz
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-domain.stix2.json
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-url.stix2.json
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/sgb-ip.stix2.json
-https://github.com/bilsectr/sgb-api-bridge/releases/latest/download/SHA256SUMS
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-feeds.tar.gz
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-qradar-pack.tar.gz
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/TA-sgb-threatintel.tar.gz
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-domain.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-url.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/sgb-ip.stix2.json
+https://github.com/bilsectr/sgb-api-bridge/releases/download/feeds-latest/SHA256SUMS
 ```
 
-Versiyon kilitlemek isterseniz: `releases/download/v<X.Y.Z>/<file>`.
-Her sync sonrasi guncel snapshot (commit edilmemis, 30 gun retention):
-Actions sekmesi > son "Sync (delta, hourly)" run > Artifacts.
+Stabil snapshot kanali ayni dosya isimleri, `latest` ya da `v<X.Y.Z>`
+yolundan. Actions artifact'lari (workflow run > Artifacts, 30 gun, auth'lu)
+tek seferlik manuel indirme icin.
 
 ## Hangi entegrasyon kim icin?
 
