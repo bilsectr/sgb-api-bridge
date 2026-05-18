@@ -88,9 +88,6 @@ jobs:
           fi
           # Asset'i replace et (clobber)
           gh release upload feeds-latest state/sgb.db --clobber
-          gh release edit feeds-latest \
-            --notes "Built (UTC): \`$BUILT_AT\`
-Commit: \`$HEAD_SHA\`
-Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-sgb.db: SQLite state, bir sonraki sync run'i tarafindan incremental restore icin kullanilir."
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          NOTES=$(printf 'Built (UTC): `%s`\nCommit: `%s`\nWorkflow run: %s\n\nsgb.db: SQLite state, bir sonraki sync run tarafindan incremental restore icin kullanilir.' "$BUILT_AT" "$HEAD_SHA" "$RUN_URL")
+          gh release edit feeds-latest --notes "$NOTES"
