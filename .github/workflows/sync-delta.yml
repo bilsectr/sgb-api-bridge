@@ -68,121 +68,29 @@ jobs:
             git push
           fi
 
-      # --- SIEM Pack artifact build (S7) ---
-      # feeds/, siem/qradar/out/, siem/splunk/out/ commit edilmez (.gitignore).
-      # Workflow artifact olarak indirilebilir (30 gun) + release.yml tag'lerinde
-      # GitHub Release'e eklenir.
-
-      - name: Build feeds/ (master CSV + JSONL + STIX 2.1 + slices)
-        # DB henuz dolu degilse (ilk delta bootstrap'tan once) skip
+      # --- Rolling 'feeds-latest' release: sgb.db'yi asset olarak yayinla.
+      # Bir sonraki sync run'i 'Restore sgb.db from rolling release' adiminda
+      # bu asset'i indirip incremental devam eder. SIEM pack (feeds/, qradar/,
+      # splunk/) commit 00ea15a'da silindi - sadece sgb.db tasiniyor.
+      - name: Publish sgb.db to rolling release 'feeds-latest'
+        if: success() && hashFiles('state/sgb.db') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -f state/sgb.db ]; then
-            python scripts/export.py
-          else
-            echo "state/sgb.db yok - export skip (full sync henuz calismadi)"
+          BUILT_AT=$(date -u +%Y-%m-%dT%H:%MZ)
+          HEAD_SHA=$(git rev-parse HEAD)
+          # Release yoksa olustur (prerelease, latest semantigini caldirmaz)
+          if ! gh release view feeds-latest >/dev/null 2>&1; then
+            gh release create feeds-latest \
+              --title "SGB sync state — rolling (saatlik)" \
+              --prerelease \
+              --notes "sgb.db SQLite state - her saat tazelenir. Workflow tarafindan yonetilir."
           fi
+          # Asset'i replace et (clobber)
+          gh release upload feeds-latest state/sgb.db --clobber
+          gh release edit feeds-latest \
+            --notes "Built (UTC): \`$BUILT_AT\`
+Commit: \`$HEAD_SHA\`
+Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-      - name: Build QRadar pack
-        run: |
-          if [ -f state/sgb.db ]; then
-            python scripts/build_pack.py
-          else
-            echo "skip"
-          fi
-
-      - name: Build Splunk TA
-        run: |
-          if [ -f state/sgb.db ]; then
-            python scripts/build_splunk_ta.py
-          else
-            echo "skip"
-          fi
-
-      - name: Upload feeds artifact
-        if: always() && hashFiles('feeds/index.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: sgb-feeds-${{ github.run_number }}
-          path: feeds/
-          retention-days: 30
-          if-no-files-found: ignore
-
-      - name: Upload QRadar pack artifact
-        if: always() && hashFiles('siem/qradar/out/manifest.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: sgb-qradar-pack-${{ github.run_number }}
-          path: siem/qradar/out/
-          retention-days: 30
-          if-no-files-found: ignore
-
-      - name: Upload Splunk TA artifact
-        if: always() && hashFiles('siem/splunk/out/TA-sgb-threatintel.tar.gz') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: sgb-splunk-ta-${{ github.run_number }}
-          path: |
-            siem/splunk/out/TA-sgb-threatintel.tar.gz
-            siem/splunk/out/manifest.json
-          retention-days: 30
-          if-no-files-found: ignore
-
-      # --- Rolling 'feeds-latest' release: SIEM tuketicileri saatlik tazelenmis
-      # artifact'lara kalici URL ile erissin diye. prerelease=true + make_latest=false
-      # ile bu release'in /releases/latest semantigini caldirmamasini garanti ediyoruz.
-      # Stabil 'latest' her zaman release-siem-pack.yml ile basilan v*X.Y.Z tag'i kalir.
-
-      - name: Prepare rolling release assets
-        if: success() && hashFiles('feeds/index.json') != ''
-        run: |
-          mkdir -p release-assets
-          tar -czf release-assets/sgb-feeds.tar.gz feeds/
-          tar -czf release-assets/sgb-qradar-pack.tar.gz -C siem/qradar/out .
-          cp siem/splunk/out/TA-sgb-threatintel.tar.gz release-assets/
-          cp feeds/stix/sgb-*.stix2.json release-assets/ 2>/dev/null || true
-          cp feeds/index.json release-assets/feeds-index.json
-          cp siem/qradar/out/manifest.json release-assets/qradar-manifest.json
-          cp siem/splunk/out/manifest.json release-assets/splunk-manifest.json
-          # sgb.db: bir sonraki workflow run'inin restore edebilmesi icin
-          # asset olarak yukle (Restore sgb.db from rolling release adimi indirir).
-          if [ -f state/sgb.db ]; then
-            cp state/sgb.db release-assets/sgb.db
-          fi
-          ( cd release-assets && sha256sum * > SHA256SUMS )
-          echo "HEAD_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
-          echo "BUILT_AT=$(date -u +%Y-%m-%dT%H:%MZ)" >> "$GITHUB_ENV"
-          ls -lh release-assets/
-
-      - name: Publish rolling release 'feeds-latest'
-        if: success() && hashFiles('release-assets/SHA256SUMS') != ''
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: feeds-latest
-          name: "SGB SIEM Pack — rolling (saatlik delta)"
-          target_commitish: ${{ env.HEAD_SHA }}
-          prerelease: true
-          make_latest: 'false'
-          body: |
-            **Rolling release — saatlik delta sync sonrasi otomatik yenilenir.**
-            Bu release her saat silinip yeniden olusturulur; URL'ler ayni kalir,
-            icerikleri saatte bir guncellenir.
-
-            - Built (UTC): `${{ env.BUILT_AT }}`
-            - Commit: `${{ env.HEAD_SHA }}`
-            - Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-            ### Kalici URL'ler (her saat tazelenir)
-
-            ```
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-feeds.tar.gz
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-qradar-pack.tar.gz
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/TA-sgb-threatintel.tar.gz
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-domain.stix2.json
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-url.stix2.json
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/sgb-ip.stix2.json
-            https://github.com/${{ github.repository }}/releases/download/feeds-latest/SHA256SUMS
-            ```
-
-            Stabil snapshot icin: ${{ github.server_url }}/${{ github.repository }}/releases/latest
-          files: release-assets/*
-          fail_on_unmatched_files: false
+sgb.db: SQLite state, bir sonraki sync run'i tarafindan incremental restore icin kullanilir."
