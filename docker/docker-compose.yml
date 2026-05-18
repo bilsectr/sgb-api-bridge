@@ -20,12 +20,6 @@ services:
       # SGB_BRIDGE_DELTA_INTERVAL_SEC: "3600"
       # Opsiyonel: delta'nin tek seferde gezecegi maks. sayfa (default 1000)
       # SGB_BRIDGE_DELTA_MAX_PAGES: "1000"
-      # SIEM Pack otomatik rebuild (default acik). 0 yaparsan feeds/ ve siem/*/out/
-      # uretilmez; sadece klasik txt feed davranisi kalir.
-      # SGB_BRIDGE_PACK_ENABLED: "1"
-      # QRadar push istersen (opsiyonel; degerler verilmezse push komutu hata verir):
-      # SGB_QRADAR_HOST: "qradar.kurum.local"
-      # SGB_QRADAR_TOKEN: "xxxx-xxxx-xxxx-xxxx"
       TZ: "Europe/Istanbul"
 
 volumes:
