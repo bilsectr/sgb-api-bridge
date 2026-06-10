@@ -1,0 +1,4 @@
+# SGB API Bridge — calisma zamani Python bagimliliklari.
+# Tek bagimlilik: SGB API'sine HTTP istekleri icin requests.
+# Dependabot (pip ekosistemi) bu dosyayi tarar; CI ve Dockerfile da bunu kullanir.
+requests>=2.32.0,<3

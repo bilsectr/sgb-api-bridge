@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install requests
+      - run: pip install -r requirements.txt
 
       # sgb.db artik git'te degil (>100MB GitHub limiti). Onceki state'i
       # rolling release 'feeds-latest' asset'inden indir. Yoksa (ilk run /
