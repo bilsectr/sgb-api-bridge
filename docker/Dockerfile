@@ -17,11 +17,11 @@
 #   /taxii2/ /api/                                     TAXII 2.1 servisi
 #   /stats.json                                        SQLite + count'lar dahil saglik
 
-FROM python:3.11-slim AS build
+FROM python:3.14-slim AS build
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --prefix=/install -r /tmp/requirements.txt
 
-FROM python:3.11-slim
+FROM python:3.14-slim
 
 LABEL org.opencontainers.image.title="SGB API Bridge" \
       org.opencontainers.image.description="SGB (eski USOM) tehdit beslemesini firewall feed'leri ve TAXII 2.1 servisine cevirir" \
