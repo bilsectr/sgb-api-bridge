@@ -18,7 +18,8 @@
 #   /stats.json                                        SQLite + count'lar dahil saglik
 
 FROM python:3.11-slim AS build
-RUN pip install --no-cache-dir --prefix=/install requests
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install --no-cache-dir --prefix=/install -r /tmp/requirements.txt
 
 FROM python:3.11-slim
 

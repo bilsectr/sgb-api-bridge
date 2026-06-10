@@ -6,6 +6,7 @@ on:
     paths:
       - 'docker/**'
       - 'scripts/sync.py'
+      - 'requirements.txt'
       - '.github/workflows/release.yml'
     tags: ['v*']
   # Haftalik rebuild: imaja gomulu seed verisi (docs/ + state/) taze kalsin.

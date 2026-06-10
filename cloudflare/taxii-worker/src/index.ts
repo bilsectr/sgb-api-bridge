@@ -159,16 +159,27 @@ async function serveEnvelope(
   const next = url.searchParams.get("next");
   const limit = parseLimit(url.searchParams.get("limit"));
 
-  // Sayfa secimi:
-  //  - next cursor (NNNN) verilmisse onu kullan
+  // Sayfa + sayfa-ici offset secimi. Cursor formati: "NNNN" veya "NNNN.OFFSET".
+  //  - next cursor verilmisse onu kullan; OFFSET, kucuk `limit`'lerde ayni sayfa
+  //    icinde ilerlemeyi saglar (offset olmadan limit sonsuz dongu uretiyordu).
   //  - degilse: added_after > T olan ilk sayfa (yoksa 1)
   let startPage = 1;
+  let startOffset = 0;
   if (next) {
-    const n = parseInt(next, 10);
-    if (!Number.isFinite(n) || n < 1) {
+    const dot = next.indexOf(".");
+    const pStr = dot === -1 ? next : next.slice(0, dot);
+    const p = parseInt(pStr, 10);
+    if (!Number.isFinite(p) || p < 1) {
       return errorResponse(400, "Invalid next cursor");
     }
-    startPage = n;
+    startPage = p;
+    if (dot !== -1) {
+      const o = parseInt(next.slice(dot + 1), 10);
+      if (!Number.isFinite(o) || o < 0) {
+        return errorResponse(400, "Invalid next cursor");
+      }
+      startOffset = o;
+    }
   } else if (addedAfter) {
     const idx = pages.pages.findIndex(p => p.max_last_changed > addedAfter);
     startPage = idx === -1 ? pages.pages.length + 1 : idx + 1;
@@ -201,17 +212,24 @@ async function serveEnvelope(
     });
   }
 
-  // limit uygula (sadece bu sayfayi kirpiyoruz; sonraki sayfa zaten next cursor)
+  // Sayfa-ici offset: onceki istekte limit ile kirpilmis sayfanin kaldigi yerden devam.
+  // Filtre (added_after) deterministik oldugu icin offset her istekte ayni indekslere denk gelir.
+  if (startOffset > 0) {
+    envelope.objects = envelope.objects.slice(startOffset);
+  }
+
+  // limit uygula. Kalan limit'ten buyukse AYNI sayfada offset'li cursor ile devam et;
+  // degilse sonraki sayfaya gec. Boylece page_size'dan kucuk limit'lerde de ilerleme garanti.
   if (limit !== null && envelope.objects.length > limit) {
     envelope.objects = envelope.objects.slice(0, limit);
     envelope.more = true;
-    envelope.next = String(startPage).padStart(4, "0");
+    envelope.next = `${pad4(startPage)}.${startOffset + limit}`;
   } else {
     // upstream envelope.more/next: gercek "daha sayfa var mi" durumu
     const hasMore = startPage < pages.pages.length;
     envelope.more = hasMore;
     if (hasMore) {
-      envelope.next = String(startPage + 1).padStart(4, "0");
+      envelope.next = pad4(startPage + 1);
     } else {
       delete envelope.next;
     }
@@ -328,6 +346,10 @@ function errorResponse(status: number, msg: string): Response {
       headers: { "Content-Type": TAXII_CT, ...CORS_HEADERS },
     },
   );
+}
+
+function pad4(n: number): string {
+  return String(n).padStart(4, "0");
 }
 
 function parseLimit(raw: string | null): number | null {

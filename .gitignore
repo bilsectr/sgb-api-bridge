@@ -6,6 +6,8 @@ venv/
 .env
 .DS_Store
 *.log
+# Node (cloudflare/taxii-worker) — package-lock.json commit edilir, node_modules edilmez
+node_modules/
 # SQLite WAL/SHM gecici dosyalar
 *.db-wal
 *.db-shm
