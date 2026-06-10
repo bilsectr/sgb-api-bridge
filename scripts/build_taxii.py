@@ -355,7 +355,7 @@ def main() -> int:
     p.add_argument("--keep-dir", action="store_true",
                    help="docs/taxii/ dizinini once silme")
     p.add_argument("--compact", action="store_true",
-                   help="Sayfa JSON'larini kompakt yaz (production icin ~%40 kucuk).")
+                   help="Sayfa JSON'larini kompakt yaz (production icin ~%%40 kucuk).")
     p.add_argument("--with-all", action="store_true",
                    help="sgb-all (tum kayitlar) koleksiyonunu da yaz. Boyutu ~2x'ler.")
     args = p.parse_args()

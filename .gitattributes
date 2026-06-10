@@ -1,0 +1,6 @@
+# Satir sonlarini normalize et. Kabuk script'leri konteyner icinde calisir;
+# Windows checkout'unda CRLF alirlarsa shebang bozulur ("exec: no such file
+# or directory"). Bu yuzden daima LF.
+* text=auto
+*.sh text eol=lf
+docker/entrypoint.sh text eol=lf
