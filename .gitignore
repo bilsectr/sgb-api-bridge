@@ -14,5 +14,6 @@ node_modules/
 # sgb.db artik git'te tutulmuyor (>100MB GitHub limiti) - rolling release
 # 'feeds-latest' asset olarak dagitilir, workflow basinda indirilir.
 state/sgb.db
-# Splunk app build ciktilari (CI/lokal build uretir)
+# App build ciktilari (CI/lokal build uretir)
 apps/splunk/dist/
+apps/qradar/dist/

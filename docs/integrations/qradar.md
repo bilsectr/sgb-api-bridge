@@ -25,6 +25,11 @@
   - Air-gapped ortamda: kendi TAXII servisinizi self-host edin
     ([setup-docker.md](../setup-docker.md), [setup-k8s.md](../setup-k8s.md))
 
+> **Otomasyon ve hazır içerik:** Aşağıdaki Adım 1'i (8 feed) ve UC
+> kurallarının kullandığı reference set'leri tek komutla kuran script ile
+> kuralların content extension olarak paketlenme akışı için:
+> [apps/qradar/](../../apps/qradar/) (`setup_feeds.py`, `rule-sheet.md`).
+
 ## Adım 1 — TAXII Feed'i ekle
 
 UI: **Admin → Threat Intelligence → Add TAXII Feed**
