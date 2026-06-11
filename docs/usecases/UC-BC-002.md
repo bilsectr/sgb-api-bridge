@@ -14,6 +14,8 @@ domain üretiyor (DGA: Domain Generation Algorithm).
 Bu durumda **IP listesi her zaman geç kalır**, ama domain listesi
 saldırganın "ev adresi"ni tutar. Bu yüzden SGB feed'inde hem IP hem
 domain ayrı set olarak bulunur ve **iki ayrı kural** koşulur.
+(Madalyonun öbür yüzü için — domain feed'de yokken cevabın bilinen C&C
+IP'sine çözümlenmesi — bkz. [UC-BC-004](UC-BC-004.md).)
 
 UC-BC-001 + UC-BC-002 ikisi birlikte yüksek kapsama sağlar; aynı asset
 1 saat içinde her ikisini de tetiklerse meta-rule [UC-XX-001](UC-XX-001.md)
@@ -44,10 +46,10 @@ devreye girer ("multi-stage compromise" göstergesi).
 | Alan | Değer |
 |------|-------|
 | ID | UC-BC-002 |
-| MITRE | TA0011 / T1071.004 DNS C2 |
+| MITRE | TA0011 / T1071.004 DNS C2 + T1568.002 Dynamic Resolution: DGA |
 | Connectiontype | BC |
 | Severity (base) | 8 |
-| Veri kaynakları | DNS query logs (BIND, Windows DNS, Infoblox, Umbrella) |
+| Veri kaynakları | DNS query logs (BIND, Windows DNS, Infoblox, Umbrella); NGFW TLS SNI logu (DoH kullanan host'larda DNS görünmese bile SNI'daki domain yakalanır) |
 | TAXII koleksiyonu | `sgb-botnet-cc` (legacy reference set: `SGB_BC_DOMAIN`, `SGB_DOMAIN_MAP`) |
 | Response | PB-BC-002 (DNS sinkhole + host quarantine) |
 

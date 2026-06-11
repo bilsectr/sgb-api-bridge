@@ -38,7 +38,7 @@ Bu yüzden ticket açılır, haftalık özet raporda yer alır.
 | **3.1.6.5** | İzin Verilmeyen Trafiğin Engellenmesi | Mining trafik politika dışı → blok. |
 | **3.1.5.1** | Zararlı Yazılımdan Korunma | Cryptojacking malware bu kapsamda. |
 | **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | UC bizatihi SIEM kuralı. |
-| **3.3.1.10** Taşınabilir cihaz ayrımı | Lab/dev cihazlar mining yapıyorsa segmentasyon değerlendirilmeli. |
+| **3.3.1.10** | Taşınabilir Cihaz Ayrımı | Lab/dev cihazlar mining yapıyorsa segmentasyon değerlendirilmeli. |
 
 ## Teknik özet
 

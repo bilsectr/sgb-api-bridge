@@ -50,7 +50,7 @@ biri DNS, diğeri HTTP katmanında — komplementer kapsama için.
 | MITRE ATT&CK | TA0001 / T1566.002 Spearphishing Link |
 | Connectiontype | PH |
 | Severity (base) | 5 |
-| Veri kaynakları | Web proxy / SWG (Bluecoat, Forcepoint, Zscaler, Squid, Cisco WSA) |
+| Veri kaynakları | Web proxy / SWG (Bluecoat, Forcepoint, Zscaler, Squid, Cisco WSA); proxy görünürlüğü olmayan segmentlerde NGFW TLS SNI logu domain seviyesinde tamamlayıcıdır (tam URL görünmez) |
 | TAXII koleksiyonu | `sgb-phishing` (legacy reference set: `SGB_PH_URL` + `SGB_URL_MAP`) |
 | Response | PB-PH-002 (URL block + kullanıcı bilgilendirme) |
 

@@ -15,11 +15,17 @@ sınıflandırılmamış olabilir; "Other" (OT) bucket'ına düşerler. Bu UC:
 
 Bu pattern emerging threat'leri (yeni kampanya başlangıcı) erken görür.
 
+> **İsim karışıklığı uyarısı:** SGB connectiontype kodu `OT` **"Other"
+> (sınıflandırılmamış)** anlamına gelir; Operational Technology (EKS/SCADA)
+> ile ilgisi yoktur. Bu bucket BG Rehberi 4.5.x kritik altyapı maddeleriyle
+> eşleştirilmemelidir. Feed'in en büyük ikinci dilimi (~%21) bu buckettadır;
+> bu yüzden log-only baseline'a ek olarak kritik asset segmenti için
+> aşağıda offense açan bir kademe tanımlanmıştır.
+
 ## BG Rehberi karşılığı
 
 | Madde | Madde adı | Bu UC ne sağlar? |
 |-------|-----------|-------------------|
-| **4.5.2** Enerji EKS / **4.5.3** Elektronik Haberleşme | Spesifik EKS/OT trafiği için baseline görünürlük. |
 | **3.1.10.4** | Siber Tehdit Bildirimlerinin Yönetilmesi | SGB OT feed'ini de değerlendirme zorunluluğu. |
 | **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | Anomaly threshold kuralı. |
 | **3.1.10.8** | Olay Puanlama ve Önceliklendirme | Düşük baseline (3) + trend alarm. |
@@ -31,7 +37,7 @@ Bu pattern emerging threat'leri (yeni kampanya başlangıcı) erken görür.
 | ID | UC-OT-001 |
 | MITRE | (kategori belirsiz) |
 | Connectiontype | OT |
-| Severity (base) | 3 (offense açılmaz, log only) |
+| Severity (base) | 3 (offense açılmaz, log only); kritik asset segmentinde 5 (offense açılır) |
 | Veri kaynakları | Tüm kaynaklar (geniş kapsam) |
 | TAXII koleksiyonu | `sgb-other` (legacy reference set: `SGB_OT_IP`, `SGB_OT_DOMAIN`, `SGB_OT_URL`) |
 
@@ -44,6 +50,13 @@ then magnitude=1 (offense açma) + add to SGB_OT_OBSERVED (TTL 24h)
 anomaly trigger:
 when count(SGB_OT match) > 100 in 1 hour
 then SOC review alarmı
+
+kritik segment trigger:
+when SGB_OT_* match
+  AND source asset "Critical" asset group'unda
+      (sunucu VLAN'ları, DMZ, EKS/SCADA segmenti)
+then offense aç (severity=5) — sınıfı belirsiz indicator bile kritik
+     segmentte insan gözü gerektirir
 ```
 
 ## QRadar uygulaması
@@ -55,6 +68,14 @@ when SGB_OT_* match → Magnitude = 1 (do NOT create offense)
 **Response:** log only + add to `SGB_OT_OBSERVED` (24h TTL).
 
 Ayrı saatlik scheduled search: `count(SGB_OT match) > 100 / hour` → alarm.
+
+**Kritik segment kademesi:**
+
+```
+when SGB_OT_* match
+  AND source asset is in asset group "Critical Assets"
+→ Magnitude = 5, offense aç ("SGB OT match on critical segment")
+```
 
 ## Splunk uygulaması
 

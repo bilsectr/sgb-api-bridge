@@ -43,7 +43,7 @@ UC-EK-002 ile birlikte: IDS'in exploit alarmı + SGB EK URL = composite
 | Alan | Değer |
 |------|-------|
 | ID | UC-EK-001 |
-| MITRE | TA0002 Execution / T1203 Exploitation for Client Execution |
+| MITRE | TA0001 / T1189 Drive-by Compromise + TA0002 / T1203 Exploitation for Client Execution |
 | Connectiontype | EK |
 | Severity (base) | 8 |
 | Veri kaynakları | Web proxy / SWG, browser EDR telemetry |

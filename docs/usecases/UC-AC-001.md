@@ -57,12 +57,16 @@ Geniş kapsamlı bir "guard rail" kuralıdır.
 
 ```text
 when herhangi log event geldi
-  AND any of (source_ip, dest_ip, url, hostname, dns_query,
-              file_hash, mail_from, mail_to) IN
+  AND any of (source_ip, dest_ip, url, hostname, dns_query) IN
               (SGB_AC_IP, SGB_AC_DOMAIN, SGB_AC_URL)
 then offense aç, severity=10 sabit
      SOC manager paging + SOAR P1 playbook
 ```
+
+> **Not:** SGB feed'i yalnızca adres-tabanlı indicator (IP/domain/URL)
+> yayınlar; file hash veya e-posta adresi içermez. Bu yüzden eşleşme
+> alanları adres alanlarıyla sınırlıdır — feed'e yeni indicator türü
+> eklenirse alan listesi genişletilmelidir.
 
 ## QRadar uygulaması
 
@@ -70,8 +74,7 @@ then offense aç, severity=10 sabit
 
 ```
 when any of these properties:
-  Source IP, Destination IP, URL, Hostname, DNS Query,
-  File Hash, Email From, Email To
+  Source IP, Destination IP, URL, Hostname, DNS Query
 is contained in any of these reference sets:
   SGB_AC_IP, SGB_AC_DOMAIN, SGB_AC_URL
 ```
@@ -91,7 +94,7 @@ is contained in any of these reference sets:
 
 ```spl
 (`sgb_all_indexes`)
-| eval test_values=mvappend(src_ip, dest_ip, url, query, hostname, file_hash, sender, recipient)
+| eval test_values=mvappend(src_ip, dest_ip, url, query, hostname)
 | mvexpand test_values
 | lookup sgb_ip_lookup    value AS test_values OUTPUT connectiontype AS ct_ip
 | lookup sgb_domain_lookup value AS test_values OUTPUT connectiontype AS ct_dom

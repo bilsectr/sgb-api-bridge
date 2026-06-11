@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>SGB API Bridge — Tehdit beslemesi: firewall'da engelleyin, SIEM'de izleyin</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Siber Güvenlik Başkanlığı (eski USOM) tehdit beslemesini iki amaçla servis eder: firewall'larda engelleme için düz metin feed (FortiGate, Sophos, Palo Alto, pfSense) ve SIEM/TIP/XDR ortamlarında izleme için TAXII 2.1 servisi (QRadar, Splunk, Sentinel, MISP, OpenCTI, XSOAR) + 20 use case kütüphanesi.">
+<meta name="description" content="Siber Güvenlik Başkanlığı (eski USOM) tehdit beslemesini iki amaçla servis eder: firewall'larda engelleme için düz metin feed (FortiGate, Sophos, Palo Alto, pfSense) ve SIEM/TIP/XDR ortamlarında izleme için TAXII 2.1 servisi (QRadar, Splunk, Sentinel, MISP, OpenCTI, XSOAR) + 24 use case kütüphanesi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Inter+Tight:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -52,7 +52,7 @@
       <div class="stat"><div class="k">IPv4</div><div class="v" id="s-ip">~14K</div></div>
       <div class="stat"><div class="k">URL</div><div class="v" id="s-url">~7K</div></div>
       <div class="stat"><div class="k">TAXII koleksiyon</div><div class="v"><a href="view.html?file=setup-taxii.md" style="color:inherit">8</a></div></div>
-      <div class="stat"><div class="k">Use Case</div><div class="v"><a href="usecases/" style="color:inherit">20</a></div></div>
+      <div class="stat"><div class="k">Use Case</div><div class="v"><a href="usecases/" style="color:inherit">24</a></div></div>
     </div>
   </section>
 
@@ -441,7 +441,7 @@ http_access deny sgb_blacklist
     <h3 style="margin-top:1.8rem">Use Case kütüphanesi</h3>
     <a class="card" href="usecases/" style="margin-top:.6rem">
       <div class="icon">📚</div>
-      <span class="pill">20 vendor-agnostik use case</span>
+      <span class="pill">24 vendor-agnostik use case</span>
       <h3>PH · BC · AC · EK · MF · MM · MC · OT + cross-category</h3>
       <p>Her use case: MITRE mapping + data sources + detection logic + TAXII koleksiyon
         eşleşmesi + severity formülü + false positive notları. Yeni use case eklemek için tek şablon.</p>

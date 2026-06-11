@@ -100,7 +100,7 @@ beklentinin nasıl karşılandığıdır.
 | **3.1.8.1** | Tüm sistem ve ağ cihazlarında **kayıt mekanizması etkin** olmalı, kayıtlar belirli süre saklanmalı. | Bu madde "log üret" der; biz log'u **anlamlandırırız**. UC sonucu alarmlar ve "match'lendi" tag'leri ise yeni bir kayıt türüdür ve aynı politikaya tabidir. |
 | **3.1.8.4** | Detaylı kayıt: olay, kaynak, zaman, kullanıcı, kaynak/hedef adres, işlem detayı. | Üretilen alarmlar (offense / notable) tam olarak bu alanlarla doldurulur (asset, SGB indicator value, connectiontype, criticality, first_seen_utc). |
 | **3.1.8.6** | **Merkezi kayıt yönetimi** — kayıtlar merkezi log yönetim sisteminde toplanmalı, hata uyarı mekanizması olmalı. | SIEM (QRadar/Splunk/Sentinel) zaten merkezi log yönetim sistemidir. Bizim entegrasyon paketlerimiz oraya enrichment getirir. |
-| **3.1.8.7** | **Kayıt analizi araçları / SIEM kullanımı**: "Siber olayların korelasyon kuralları doğrultusunda tespiti ve detaylı analizi için siber tehdit ve olay yönetim sistemleri veya kayıt analizi araçları kullanılmalı." | **Bu projenin tam karşılığı.** docs/usecases/ altındaki 22 use case = "korelasyon kuralı kütüphanesi". Her UC bir tehdit senaryosunu adresler. |
+| **3.1.8.7** | **Kayıt analizi araçları / SIEM kullanımı**: "Siber olayların korelasyon kuralları doğrultusunda tespiti ve detaylı analizi için siber tehdit ve olay yönetim sistemleri veya kayıt analizi araçları kullanılmalı." | **Bu projenin tam karşılığı.** docs/usecases/ altındaki 24 use case = "korelasyon kuralı kütüphanesi". Her UC bir tehdit senaryosunu adresler. |
 | **3.1.8.8** | SIEM yapılandırması düzenli gözden geçirilmeli (FP elenmeli). | UC dosyalarındaki "False positive notları" bölümleri ve `source=IH` için ayrı reference set önerimiz tam olarak bu gözden geçirme döngüsünü besler. |
 
 #### 3.1.10 — Siber Güvenlik Olay Yönetimi
@@ -134,7 +134,7 @@ beklentinin nasıl karşılandığıdır.
 
 | Madde | Tedbirin özeti | Bu proje nasıl karşılar? |
 |-------|----------------|--------------------------|
-| **4.5.2** Enerji EKS | OT/EKS özelinde güvenlik. | SGB OT feed'i bu sektör için derlenir; [UC-OT-001](usecases/UC-OT-001.md) "info-only baseline" alarm kuralı ile başlangıç görünürlüğü sağlar. |
+| **4.5.2** Enerji EKS | OT/EKS özelinde güvenlik. | SGB feed'i sektör-spesifik değildir — connectiontype `OT` kodu "Other" (sınıflandırılmamış) anlamına gelir, Operational Technology değildir. EKS ağlarında feed air-gapped self-host modeliyle ([setup-docker.md](setup-docker.md)) tüketilebilir; izleme genel UC'lerle (özellikle UC-BC-*, UC-AC-*) yapılır. |
 | **4.5.3** Elektronik haberleşme | Telekom sektörü. | MC + AC feed'i mobil/IP altyapısındaki tehditlerin tespiti için kullanılır. |
 
 ### 5. Sıkılaştırma Tedbirleri
@@ -159,6 +159,7 @@ hazırlığında "her UC için neyi anlatacağım" sorusunun cevabıdır.
 | [UC-BC-001](usecases/UC-BC-001.md) Outbound → SGB Botnet C&C IP | 3.1.5.1, 3.1.6.4, 3.1.6.5 | 3.1.8.6, 3.1.8.7, 3.1.10.4 |
 | [UC-BC-002](usecases/UC-BC-002.md) DNS → SGB Botnet C&C domain | 3.1.5.1, 3.1.5.7, 3.1.6.4 | 3.1.8.7, 3.1.10.4 |
 | [UC-BC-003](usecases/UC-BC-003.md) Periyodik beacon (NetFlow) | 3.1.6.4, 3.1.6.18, 3.1.8.7 | 3.1.10.4, 3.1.10.8 |
+| [UC-BC-004](usecases/UC-BC-004.md) DNS yanıtı → SGB C&C IP | 3.1.5.7, 3.1.6.4 | 3.1.8.7, 3.1.10.4 |
 | [UC-AC-001](usecases/UC-AC-001.md) APT C&C herhangi eşleşme | 3.1.10.4, 3.1.10.5, 3.1.10.8 | 3.1.5.6, 3.1.8.6, 3.1.8.7 |
 | [UC-AC-002](usecases/UC-AC-002.md) Aynı asset 3+ AC match / 30 dk | 3.1.8.7, 3.1.10.4, 3.1.10.8 | 3.1.10.5 |
 | [UC-EK-001](usecases/UC-EK-001.md) HTTP → SGB Exploit Kit URL | 3.1.5.1, 3.1.6.20, 3.1.6.28 | 3.1.8.7, 3.1.10.4 |
@@ -169,10 +170,13 @@ hazırlığında "her UC için neyi anlatacağım" sorusunun cevabıdır.
 | [UC-MM-002](usecases/UC-MM-002.md) CPU spike + SGB MM hit | 3.1.5.1, 3.1.8.7 | 3.1.10.8 |
 | [UC-MC-001](usecases/UC-MC-001.md) Mobil/VPN → SGB MC | 3.3.1, 3.1.6.4 | 3.1.10.4 |
 | [UC-MC-002](usecases/UC-MC-002.md) MDM app traffic → SGB MC | 3.3.1, 3.3.1.10 | 3.1.10.4 |
-| [UC-OT-001](usecases/UC-OT-001.md) Herhangi SGB OT match | 4.5.2, 4.5.3 | 3.1.10.4 |
+| [UC-OT-001](usecases/UC-OT-001.md) Herhangi SGB OT ("Other") match | 3.1.10.4, 3.1.8.7 | 3.1.10.8 |
 | [UC-XX-001](usecases/UC-XX-001.md) Asset 2+ farklı CT / 24 saat | 3.1.8.7, 3.1.8.8 | 3.1.10.8 |
 | [UC-XX-002](usecases/UC-XX-002.md) Aynı indicator 2x / 7 gün | 3.1.8.7, 3.1.10.8 | — |
 | [UC-XX-003](usecases/UC-XX-003.md) Org-wide criticality artışı | 3.1.8.7, 3.1.10.5, 3.1.10.8 | — |
+| [UC-XX-004](usecases/UC-XX-004.md) Feed sağlık/bütünlük izleme | 3.1.8.8, 3.1.10.4 | 3.1.8.7 |
+| [UC-XX-005](usecases/UC-XX-005.md) Yeni indicator retro-hunt | 3.1.8.6, 3.1.8.7 | 3.1.10.4, 3.1.10.8 |
+| [UC-XX-006](usecases/UC-XX-006.md) SGB IP'sinden inbound erişim | 3.1.6.4, 3.1.8.7 | 3.1.6.5, 3.1.10.4 |
 
 ⭐ **Bütün use case'lerin ortak BG referansı: 3.1.10.4 + 3.1.8.7.** Yani bir
 denetçi "siz SGB tehdit istihbaratını nasıl kullanıyorsunuz?" diye sorduğunda
@@ -224,7 +228,7 @@ cevaplar şunlardır:
 
 **Soru: "Madde 3.1.8.7 — SIEM korelasyon kurallarınız neyi kapsar?"**
 
-- Cevap: 22 use case'lik kütüphanemiz var (docs/usecases/), 8 connectiontype'ı
+- Cevap: 24 use case'lik kütüphanemiz var (docs/usecases/), 8 connectiontype'ı
   + cross-category meta-rule'ları kapsıyor. Severity QRadar magnitude /
   Splunk urgency'ye eşleniyor (bkz. [usecases/README.md#severity](usecases/README.md#severity)).
 
@@ -278,7 +282,9 @@ Bu maddeler için ayrı çözümler / süreçler gereklidir; SGB feed'i bunları
 
 **Faz 3 (3-4. hafta) — Use case devreye alma**
 
-6. UC-PH-001, UC-BC-001, UC-AC-001 ile başla (en yüksek değer/risk oranı).
+6. UC-XX-004 (feed sağlığı — diğer her kuralın ön koşulu), ardından
+   UC-PH-001, UC-BC-001, UC-AC-001 ile başla (en yüksek değer/risk oranı;
+   tam sıralama: [usecases/README.md#tiers](usecases/README.md#tiers)).
 7. 2 hafta gözlem; FP gelirse UC dosyasındaki "FP notları" bölümündeki
    suppress önerilerini uygula.
 8. Kalan use case'leri devreye al.

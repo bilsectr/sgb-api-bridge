@@ -42,7 +42,7 @@ ifadesinin tam karşılığıdır.
 | Alan | Değer |
 |------|-------|
 | ID | UC-EK-002 |
-| MITRE | TA0002 / T1190 + T1203 |
+| MITRE | TA0001 / T1189 Drive-by Compromise + TA0002 / T1203 |
 | Connectiontype | EK (composite) |
 | Severity (base) | 9 |
 | Veri kaynakları | IDS/IPS (Snort, Suricata, Palo Alto Threat) + Web proxy |

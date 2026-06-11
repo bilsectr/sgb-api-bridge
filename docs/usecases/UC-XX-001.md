@@ -27,7 +27,7 @@ parçasıdır.
   domain'e).
 - 09:30 — Aynı host UC-MF-001 tetikledi (proxy'den malware indirdi).
 - 11:00 — Aynı host UC-BC-001 tetikledi (botnet C&C bağlantısı).
-- 11:00:01 — Distinct CT count = 3 (>2) → UC-XX-001 severity 8 alarm.
+- 11:00:01 — Distinct CT count = 3 (≥2) → UC-XX-001 severity 8 alarm.
   Multi-stage compromise.
 
 ## BG Rehberi karşılığı

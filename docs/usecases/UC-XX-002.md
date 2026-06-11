@@ -31,7 +31,7 @@ rate düşük olmalı.
 |-------|-----------|-------------------|
 | **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | Tarihsel korelasyon. |
 | **3.1.10.8** | Siber Olay Puanlama ve Önceliklendirme | Re-infection = öncelik artırılması gerek. |
-| **3.5.2** Eğitim ve Farkındalık | Aynı kullanıcı tekrar tıkladıysa farkındalık gap'i. |
+| **3.5.2** | Eğitim ve Farkındalık | Aynı kullanıcı tekrar tıkladıysa farkındalık gap'i. |
 
 ## Teknik özet
 

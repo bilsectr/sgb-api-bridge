@@ -48,7 +48,7 @@ alan adı SGB'nin oltalama listesinde varsa — alarm üretir.
 | MITRE ATT&CK | TA0001 Initial Access / T1566.002 Spearphishing Link |
 | Connectiontype | PH |
 | Severity (base) | 5 (kritiklik modifier ile yükselir) |
-| Veri kaynakları | DNS query log (BIND, Windows DNS, Infoblox, Cisco Umbrella, Pi-hole) |
+| Veri kaynakları | DNS query log (BIND, Windows DNS, Infoblox, Cisco Umbrella, Pi-hole); NGFW TLS SNI logu (DoH/DoT kullanan istemcilerde tamamlayıcı görünürlük) |
 | TAXII koleksiyonu | `sgb-phishing` (legacy reference set: `SGB_PH_DOMAIN` + `SGB_DOMAIN_MAP` (zenginleştirme için)) |
 | Response playbook | PB-PH-001 (kullanıcı uyarısı + URL blok + EDR taraması) |
 

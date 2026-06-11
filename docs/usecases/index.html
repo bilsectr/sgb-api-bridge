@@ -2,9 +2,9 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<title>SGB SIEM Use Case Kütüphanesi — 20 vendor-agnostik kural</title>
+<title>SGB SIEM Use Case Kütüphanesi — 24 vendor-agnostik kural</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="SGB indicator feed'i kullanan 20 SIEM use case'i: kanonik tanım, MITRE mapping, QRadar/Splunk implementasyon pointer'ları, severity formülü, false positive notları.">
+<meta name="description" content="SGB indicator feed'i kullanan 24 SIEM use case'i: kanonik tanım, MITRE mapping, QRadar/Splunk implementasyon pointer'ları, severity formülü, false positive notları.">
 <link rel="stylesheet" href="../assets/sgb.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
 <main>
 
   <section class="hero">
-    <span class="tag">20 use case · vendor-agnostik · MITRE mapped</span>
+    <span class="tag">24 use case · vendor-agnostik · MITRE mapped</span>
     <h1>SIEM Use Case Kütüphanesi</h1>
     <p class="lede">
       SGB indicator'larını kullanan kanonik korelasyon kuralları. Her use case
@@ -48,16 +48,16 @@
     <h2>Filtrele</h2>
     <input class="search" id="uc-search" type="search" placeholder="Başlık veya ID ile ara (örn: phishing, BC-001, APT)..." aria-label="Use case ara">
     <div class="filterbar" id="uc-filter" role="tablist">
-      <button class="chip active" data-ct="ALL">Tümü (20)</button>
+      <button class="chip active" data-ct="ALL">Tümü (24)</button>
       <button class="chip" data-ct="PH">PH · Phishing (3)</button>
-      <button class="chip" data-ct="BC">BC · Botnet C2 (3)</button>
+      <button class="chip" data-ct="BC">BC · Botnet C2 (4)</button>
       <button class="chip" data-ct="AC">AC · APT C2 (2)</button>
       <button class="chip" data-ct="EK">EK · Exploit Kit (2)</button>
       <button class="chip" data-ct="MF">MF · Malware Download (2)</button>
       <button class="chip" data-ct="MM">MM · Mining (2)</button>
       <button class="chip" data-ct="MC">MC · Mobile C2 (2)</button>
       <button class="chip" data-ct="OT">OT · Other (1)</button>
-      <button class="chip" data-ct="XX">XX · Cross-category (3)</button>
+      <button class="chip" data-ct="XX">XX · Cross-category (6)</button>
     </div>
 
     <div class="grid cards" id="uc-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr))"></div>
@@ -80,12 +80,12 @@
         <tr><td><strong>MC</strong></td><td>Mobile C&amp;C</td><td>7</td><td>Yalnız MDM/mobil VPN log source'larında</td></tr>
         <tr><td><strong>PH</strong></td><td>Phishing</td><td>5</td><td>Volume yüksek; credential exposure</td></tr>
         <tr><td><strong>MM</strong></td><td>Mining</td><td>3</td><td>Policy ihlali; performans etkisi</td></tr>
-        <tr><td><strong>OT</strong></td><td>Other</td><td>3</td><td>Informational; offense açmaz</td></tr>
+        <tr><td><strong>OT</strong></td><td>Other (sınıflandırılmamış — EKS/SCADA değildir)</td><td>3</td><td>Informational; yalnız kritik asset segmentinde offense (5)</td></tr>
       </tbody>
     </table>
     <p class="section-sub" style="margin-top:.6rem">
       Final severity = <code>clamp(base + (criticality_level − 5) / 2, 1, 10)</code>.
-      Source ∈ {IH} (ihbar) → offense açma, log at. Tam formül:
+      Source ∈ {IH} (ihbar) → offense açma, log at (istisna: AC ve BC eşleşmeleri IH'de bile offense açar). Tam formül:
       <a href="../view.html?file=usecases/README.md#severity">usecases/README.md</a>.
     </p>
   </section>
@@ -126,14 +126,15 @@
     { id: 'UC-PH-002', ct: 'PH', title: 'Proxy HTTP → SGB phishing URL', sev: 5, mitre: 'T1566.002' },
     { id: 'UC-PH-003', ct: 'PH', title: 'Email body link → SGB phishing domain', sev: 6, mitre: 'T1566.002' },
     { id: 'UC-BC-001', ct: 'BC', title: 'Outbound → SGB Botnet C&C IP', sev: 8, mitre: 'T1071' },
-    { id: 'UC-BC-002', ct: 'BC', title: 'DNS query → SGB Botnet C&C domain', sev: 8, mitre: 'T1071.004' },
-    { id: 'UC-BC-003', ct: 'BC', title: 'Periodic beacon → SGB IP (NetFlow)', sev: 8, mitre: 'T1071 + T1029' },
+    { id: 'UC-BC-002', ct: 'BC', title: 'DNS query → SGB Botnet C&C domain', sev: 8, mitre: 'T1071.004 + T1568.002' },
+    { id: 'UC-BC-003', ct: 'BC', title: 'Periodic beacon → SGB IP (NetFlow)', sev: 9, mitre: 'T1071 + T1029' },
+    { id: 'UC-BC-004', ct: 'BC', title: 'DNS answer resolves to SGB C&C IP', sev: 8, mitre: 'T1568 + T1071.004' },
     { id: 'UC-AC-001', ct: 'AC', title: 'Any SGB APT C&C match', sev: 10, mitre: 'T1071' },
     { id: 'UC-AC-002', ct: 'AC', title: 'Single asset, 3+ AC matches / 30 min', sev: 10, mitre: 'TA0011' },
-    { id: 'UC-EK-001', ct: 'EK', title: 'HTTP request → SGB Exploit Kit URL', sev: 8, mitre: 'T1203' },
-    { id: 'UC-EK-002', ct: 'EK', title: 'IDS exploit alert + SGB EK IP/URL', sev: 9, mitre: 'T1190 + T1203' },
+    { id: 'UC-EK-001', ct: 'EK', title: 'HTTP request → SGB Exploit Kit URL', sev: 8, mitre: 'T1189 + T1203' },
+    { id: 'UC-EK-002', ct: 'EK', title: 'IDS exploit alert + SGB EK IP/URL', sev: 9, mitre: 'T1189 + T1203' },
     { id: 'UC-MF-001', ct: 'MF', title: 'Proxy download from SGB malware URL', sev: 7, mitre: 'T1105' },
-    { id: 'UC-MF-002', ct: 'MF', title: 'EDR file fetched from SGB malware host', sev: 8, mitre: 'T1105 + TA0005' },
+    { id: 'UC-MF-002', ct: 'MF', title: 'EDR file fetched from SGB malware host', sev: 8, mitre: 'T1105' },
     { id: 'UC-MM-001', ct: 'MM', title: 'Outbound → SGB mining indicator', sev: 3, mitre: 'T1496' },
     { id: 'UC-MM-002', ct: 'MM', title: 'CPU spike + SGB MM indicator hit', sev: 5, mitre: 'T1496' },
     { id: 'UC-MC-001', ct: 'MC', title: 'Mobile/VPN → SGB Mobile C&C indicator', sev: 7, mitre: 'T1437' },
@@ -142,6 +143,9 @@
     { id: 'UC-XX-001', ct: 'XX', title: 'Same asset hits 2+ distinct CTs / 24h', sev: 8, mitre: 'TA0011 multi-stage' },
     { id: 'UC-XX-002', ct: 'XX', title: 'Asset re-infection: same indicator 2× / 7d', sev: 7, mitre: 'TA0003' },
     { id: 'UC-XX-003', ct: 'XX', title: 'Org-wide criticality spike (avg > 7 / hr)', sev: null, mitre: 'cross — emergent campaign' },
+    { id: 'UC-XX-004', ct: 'XX', title: 'SGB feed health & integrity watchdog', sev: 'N/A (ops)', mitre: '— (operational)' },
+    { id: 'UC-XX-005', ct: 'XX', title: 'Retro-hunt: new indicators vs. historical logs', sev: 'CT base', mitre: 'cross — historical' },
+    { id: 'UC-XX-006', ct: 'XX', title: 'Inbound access from SGB-listed IP', sev: '5-10', mitre: 'T1133 + T1110' },
   ];
 
   const grid = document.getElementById('uc-grid');

@@ -39,7 +39,7 @@ güvenilirlikli sinyaldir; otomatik host isolation tetiklenebilir.
 | Alan | Değer |
 |------|-------|
 | ID | UC-MF-002 |
-| MITRE | TA0002 / T1105 + TA0005 Defense Evasion |
+| MITRE | TA0002 / T1105 Ingress Tool Transfer |
 | Connectiontype | MF (composite) |
 | Severity (base) | 8 |
 | Veri kaynakları | EDR (file_create + process_network) + opsiyonel Proxy |

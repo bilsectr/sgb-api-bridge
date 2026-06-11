@@ -44,7 +44,7 @@ Bu kombinasyon SOC için "false positive değil, gerçek bot" kanıtıdır.
 | ID | UC-BC-003 |
 | MITRE | TA0011 / T1071 + T1029 Scheduled Transfer |
 | Connectiontype | BC |
-| Severity (base) | 8 |
+| Severity (base) | 9 (composite — beacon paterni doğrulanmış BC sinyali, tekil hit'ten +1) |
 | Veri kaynakları | NetFlow v5/v9, sFlow, IPFIX, firewall flow log |
 | TAXII koleksiyonu | `sgb-botnet-cc` (legacy reference set: `SGB_BC_IP`) |
 | Response | PB-BC-003 (host isolation + memory dump + IR) |
@@ -79,7 +79,7 @@ THEN match must occur at least 5 times in 1 hour
 ```
 
 **Response:**
-- Severity 8 + criticality
+- Severity 9 + criticality
 - Annotate offense "SGB Botnet Beacon Pattern"
 - SOAR host isolate
 

@@ -41,7 +41,7 @@ silindi/karantinaya alındı" diyebilir.
 | **3.1.5.1** | Zararlı Yazılımdan Korunma Uygulamaları + Merkezi Yönetim | SGB feed'i merkezi yönetilen IoC kaynağıdır. |
 | **3.1.8.7** | Kayıt Analizi Araçları (SIEM) | Mail gateway log'unu SIEM'de korelasyona sokar. |
 | **3.1.10.4** | Siber Tehdit Bildirimlerinin Yönetilmesi | SGB bildirimi → mail seviyesinde önlem. |
-| **3.5.2** Eğitim ve Farkındalık | Aday alıcı listesi farkındalık eğitimi için input olur. |
+| **3.5.2** | Eğitim ve Farkındalık | Aday alıcı listesi farkındalık eğitimi için input olur. |
 
 ## Teknik özet
 
