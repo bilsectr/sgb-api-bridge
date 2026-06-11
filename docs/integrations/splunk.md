@@ -18,8 +18,11 @@
 
 ## Ön koşullar
 
-Splunk dağıtımına göre iki seçenek:
+Splunk dağıtımına göre üç seçenek:
 
+- **Hazır uygulama paketi (önerilen)** — bu repo'nun ürettiği
+  `TA-sgb-threat-intel` + `sgb_usecases` paketleri: TAXII input, lookup'lar,
+  24 hazır UC kuralı ve dashboard'lar birlikte gelir → [Yöntem C](#yöntem-c)
 - **Splunk Enterprise Security (ES)** — Threat Intelligence Manager (built-in)
 - **Splunk Core / Cloud (ES'siz)** — `Splunk Add-on for STIX/TAXII` veya
   `taxii2://` modular input (community/Splunkbase app)
@@ -110,6 +113,24 @@ index=threat_intel sourcetype=stix:indicator x_sgb_connectiontype="PH"
 
 Bu lookup'ı sonra DNS event'larına bağlayın (`lookup sgb_phishing_lookup
 value AS query`).
+
+## Yöntem C — Hazır uygulama paketi (TA + App) {#yöntem-c}
+
+Yukarıdaki adımları tek tek yapmak yerine bu repo'daki iki paketi kurun
+([apps/splunk/](../../apps/splunk/)):
+
+| Paket | İçerik |
+|---|---|
+| `TA-sgb-threat-intel` | `sgb_taxii` modular input (8 koleksiyon, saatlik incremental), STIX event ingest, `sgb_domain/ip/url` lookup üretimi |
+| `sgb_usecases` | 24 UC saved search (MITRE + BG Rehberi annotation'lı, tier'lara göre disabled gelir) + 3 dashboard (genel bakış, UC aktivitesi, feed sağlığı) |
+
+```bash
+python apps/splunk/build.py   # dist/*.tar.gz üretir → Manage Apps → Install from file
+```
+
+Kurulum adımları, ES notları ve bilinen sınırlamalar:
+[apps/splunk/README.md](../../apps/splunk/README.md). Paketler her PR'da
+AppInspect'ten (cloud tag dahil) geçirilir; Splunkbase yayını için hazırdır.
 
 ## Önerilen başlangıç bundle'ı
 

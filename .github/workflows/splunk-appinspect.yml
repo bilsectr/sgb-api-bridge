@@ -1,0 +1,57 @@
+# Splunk app paketlerini build edip AppInspect'ten gecirir (cloud tag dahil).
+# Splunkbase submission oncesi ayni kontroller lokal de kosulabilir:
+#   python apps/splunk/build.py && splunk-appinspect inspect apps/splunk/dist/<pkg> --mode precert
+name: Splunk AppInspect
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/splunk/**'
+      - '.github/workflows/splunk-appinspect.yml'
+  pull_request:
+    paths:
+      - 'apps/splunk/**'
+      - '.github/workflows/splunk-appinspect.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  appinspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [TA-sgb-threat-intel, sgb_usecases]
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+
+      - name: Build package
+        run: python apps/splunk/build.py --app ${{ matrix.app }}
+
+      - name: Resolve package path
+        id: pkg
+        run: echo "path=$(ls apps/splunk/dist/${{ matrix.app }}-*.tar.gz)" >> "$GITHUB_OUTPUT"
+
+      - name: AppInspect (standard + cloud tags)
+        uses: splunk/appinspect-cli-action@v2.13
+        with:
+          app_path: ${{ steps.pkg.outputs.path }}
+          included_tags: cloud
+          result_file: appinspect-${{ matrix.app }}.json
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appinspect-${{ matrix.app }}
+          path: |
+            apps/splunk/dist/*.tar.gz
+            appinspect-${{ matrix.app }}.json

@@ -1,0 +1,68 @@
+<form version="1.1" theme="dark">
+  <label>SGB - Use Case Aktivitesi</label>
+  <description>Use case bazında eşleşme kırılımı. Kaynak: sgb_summary (UC'lerin alarm çıktıları).</description>
+  <fieldset submitButton="false">
+    <input type="time" token="tr">
+      <label>Zaman aralığı</label>
+      <default>
+        <earliest>-7d@d</earliest>
+        <latest>now</latest>
+      </default>
+    </input>
+    <input type="dropdown" token="ct">
+      <label>Connectiontype</label>
+      <choice value="*">Tümü</choice>
+      <choice value="PH">PH - Phishing</choice>
+      <choice value="BC">BC - Botnet C&amp;C</choice>
+      <choice value="AC">AC - APT C&amp;C</choice>
+      <choice value="EK">EK - Exploit Kit</choice>
+      <choice value="MF">MF - Malware Download</choice>
+      <choice value="MM">MM - Mining</choice>
+      <choice value="MC">MC - Mobile C&amp;C</choice>
+      <choice value="OT">OT - Other</choice>
+      <choice value="XX">XX - Meta</choice>
+      <default>*</default>
+    </input>
+  </fieldset>
+  <row>
+    <panel>
+      <title>Eşleşme trendi (UC bazında)</title>
+      <chart>
+        <search>
+          <query>`sgb_notable_index` sgb_ct="$ct$" | timechart span=1h count by sgb_uc</query>
+          <earliest>$tr.earliest$</earliest>
+          <latest>$tr.latest$</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Use case özeti</title>
+      <table>
+        <search>
+          <query>`sgb_notable_index` sgb_ct="$ct$" | stats count AS hits, dc(src_ip) AS distinct_assets, avg(severity) AS avg_severity, max(_time) AS last_hit by sgb_uc, sgb_ct | eval avg_severity=round(avg_severity, 1), last_hit=strftime(last_hit, "%F %T") | sort - hits</query>
+          <earliest>$tr.earliest$</earliest>
+          <latest>$tr.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Eşleşme detayları</title>
+      <table>
+        <search>
+          <query>`sgb_notable_index` sgb_ct="$ct$" | table _time, sgb_uc, sgb_ct, src_ip, sgb_indicator_value, severity, source | sort - _time | head 100</query>
+          <earliest>$tr.earliest$</earliest>
+          <latest>$tr.latest$</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <option name="count">25</option>
+      </table>
+    </panel>
+  </row>
+</form>

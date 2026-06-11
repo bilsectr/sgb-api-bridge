@@ -54,7 +54,7 @@ Her SIEM/TIP ürünü kendi built-in TAXII 2.1 client'ı ile bu URL'yi doğrudan
 | Ürün | Doküman |
 |---|---|
 | IBM QRadar | [docs/integrations/qradar.md](docs/integrations/qradar.md) |
-| Splunk (ES + Core) | [docs/integrations/splunk.md](docs/integrations/splunk.md) |
+| Splunk (ES + Core) | [docs/integrations/splunk.md](docs/integrations/splunk.md) — hazır app paketi: [apps/splunk/](apps/splunk/) (TA + 24 UC kuralı + dashboard) |
 | Microsoft Sentinel | [docs/integrations/sentinel.md](docs/integrations/sentinel.md) |
 | MISP | [docs/integrations/misp.md](docs/integrations/misp.md) |
 | OpenCTI | [docs/integrations/opencti.md](docs/integrations/opencti.md) |

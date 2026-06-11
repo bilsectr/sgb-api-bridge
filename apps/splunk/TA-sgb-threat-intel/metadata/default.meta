@@ -1,0 +1,5 @@
+# TA objeleri (lookup, transform, macro) sgb_usecases app'inden ve Search'ten
+# erisilebilsin diye system-level export edilir.
+[]
+access = read : [ * ], write : [ admin, sc_admin ]
+export = system

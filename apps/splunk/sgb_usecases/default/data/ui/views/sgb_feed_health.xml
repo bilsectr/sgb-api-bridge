@@ -1,0 +1,71 @@
+<dashboard version="1.1" theme="dark">
+  <label>SGB - Feed Sağlığı</label>
+  <description>UC-XX-004'ün görsel karşılığı: TAXII ingest durumu, indicator sayısı tarihçesi ve ani düşüş kontrolü. Feed sağlığı diğer tüm kuralların ön koşuludur.</description>
+  <row>
+    <panel>
+      <title>Yeni/değişen indicator (son 24 saat)</title>
+      <single>
+        <search>
+          <query>`sgb_ti_index` | dedup stix_id | stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>TAXII input durumu (son event yaşı)</title>
+      <table>
+        <search>
+          <query>| tstats max(_indextime) AS last_ingest, count AS events WHERE `sgb_ti_index` BY source | eval lag_min=round((now()-last_ingest)/60, 0), last_ingest=strftime(last_ingest, "%F %T") | eval durum=case(lag_min&lt;=120, "OK", lag_min&lt;=360, "GECİKMELİ", true(), "DURMUŞ") | table source, events, last_ingest, lag_min, durum</query>
+          <earliest>-7d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <format type="color" field="durum">
+          <colorPalette type="map">{"OK": #53a051, "GECİKMELİ": #f8be34, "DURMUŞ": #dc4e41}</colorPalette>
+        </format>
+      </table>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Indicator sayısı tarihçesi (tip bazında, 90 gün)</title>
+      <chart>
+        <search>
+          <query>| inputlookup sgb_feed_count_history | eval _time=_time | timechart span=1h latest(n) by feed</query>
+          <earliest>-90d@d</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">line</option>
+        <option name="charting.legend.placement">bottom</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Ani düşüş kontrolü (son iki snapshot, eşik %20)</title>
+      <table>
+        <search>
+          <query>| inputlookup sgb_feed_count_history | sort - _time | streamstats count AS rank by feed | where rank&lt;=2 | stats latest(n) AS son, earliest(n) AS onceki by feed | eval degisim_pct=round(100*(son-onceki)/onceki, 1) | eval durum=if(degisim_pct&lt;-20, "DÜŞÜŞ — incele (UC-XX-004)", "OK") | table feed, onceki, son, degisim_pct, durum</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+        <format type="color" field="durum">
+          <colorPalette type="map">{"OK": #53a051}</colorPalette>
+        </format>
+      </table>
+    </panel>
+    <panel>
+      <title>Kaynak (source) dağılımı — FP kalibrasyonu için</title>
+      <chart>
+        <search>
+          <query>| inputlookup sgb_indicators | stats count by source | sort - count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">bar</option>
+      </chart>
+    </panel>
+  </row>
+</dashboard>

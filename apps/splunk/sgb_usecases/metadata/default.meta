@@ -1,0 +1,6 @@
+[]
+access = read : [ * ], write : [ admin, sc_admin ]
+
+# Makrolar Search app'ten ad-hoc kullanilabilsin
+[macros]
+export = system

@@ -1,0 +1,6 @@
+<nav search_view="search">
+  <view name="sgb_overview" default="true" />
+  <view name="sgb_activity" />
+  <view name="sgb_feed_health" />
+  <view name="search" />
+</nav>

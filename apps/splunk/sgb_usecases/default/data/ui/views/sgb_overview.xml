@@ -1,0 +1,109 @@
+<dashboard version="1.1" theme="dark">
+  <label>SGB - Genel Bakış</label>
+  <description>SGB tehdit feed'i durumu ve son 24 saatteki use case eşleşmeleri. Veri görünmüyorsa: TA input'larını enable edin, sgb_summary index'ini oluşturun ve Tier 1 kurallarını açın.</description>
+  <row>
+    <panel>
+      <title>Toplam aktif indicator</title>
+      <single>
+        <search>
+          <query>| inputlookup sgb_indicators | stats count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="useColors">0</option>
+      </single>
+    </panel>
+    <panel>
+      <title>Domain</title>
+      <single>
+        <search>
+          <query>| inputlookup sgb_indicators | where type="domain" | stats count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>IP (v4+v6)</title>
+      <single>
+        <search>
+          <query>| inputlookup sgb_indicators | where type IN ("ip", "ip6", "ip6net") | stats count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>URL</title>
+      <single>
+        <search>
+          <query>| inputlookup sgb_indicators | where type="url" | stats count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+      </single>
+    </panel>
+    <panel>
+      <title>Eşleşme (son 24 saat)</title>
+      <single>
+        <search>
+          <query>`sgb_notable_index` | stats count</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="rangeColors">["0x53a051", "0xdc4e41"]</option>
+        <option name="rangeValues">[0]</option>
+        <option name="useColors">1</option>
+      </single>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>Feed dağılımı — connectiontype</title>
+      <chart>
+        <search>
+          <query>| inputlookup sgb_indicators | stats count by connectiontype | sort - count</query>
+          <earliest>-5m</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">pie</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>Eşleşme trendi — son 24 saat (CT bazında)</title>
+      <chart>
+        <search>
+          <query>`sgb_notable_index` | timechart span=1h count by sgb_ct</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="charting.chart">column</option>
+        <option name="charting.chart.stackMode">stacked</option>
+      </chart>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <title>En çok eşleşen asset'ler (24 saat)</title>
+      <table>
+        <search>
+          <query>`sgb_notable_index` | stats count AS hits, dc(sgb_uc) AS distinct_ucs, values(sgb_ct) AS cts, max(severity) AS max_severity by src_ip | sort - hits | head 10</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+    <panel>
+      <title>Son eşleşmeler</title>
+      <table>
+        <search>
+          <query>`sgb_notable_index` | table _time, sgb_uc, sgb_ct, src_ip, sgb_indicator_value, severity, source | sort - _time | head 20</query>
+          <earliest>-24h@h</earliest>
+          <latest>now</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
