@@ -56835,6 +56835,7 @@ b464.m0rx1.com
 b485c.rmene.ru
 b48ded58.dsfiurb-u.shop
 b48qokag4zsl.storage.googleapis.com
+b4b422zsed2q.duckdns.org
 b4c4dd8d.dj-hd5kfu.shop
 b4dfa5.xyz
 b4diyc.duckdns.org
@@ -255581,6 +255582,7 @@ kuveyt-mobil-online-pratiksube.com
 kuveyt-mobilgiris-togg.com
 kuveyt-mobilll.duckdns.org
 kuveyt-net.com
+kuveyt-onlineislemler.duckdns.org
 kuveyt-t-u-r-k-k.duckdns.org
 kuveyt-togg-basvuru.com
 kuveyt-turk-dijitalbankacilik.duckdns.org
@@ -268603,6 +268605,7 @@ masakbildiri.org
 masakbinanceturkiye.duckdns.org
 masakbirim.org
 masakblokesi.com
+masakbncaktivasyon.duckdns.org
 masakceza.com
 masakcezabilgi.org
 masakcezaportal.net
@@ -298713,6 +298716,7 @@ online-kunde.duckdns.org
 online-kunden.duckdns.org
 online-kupon.name.tr
 online-kuveyt.com
+online-kuveytmobil.duckdns.org
 online-kuveytturk.com
 online-kuveytturkiye.com
 online-limitim.net
@@ -400344,6 +400348,7 @@ tuvturkrezervasyon.com
 tuvturkrezervasyon.org
 tuvturkrezervasyonum.net
 tuvturkrezervasyonum.org
+tuvturkruk.com
 tuvturks-d.digital
 tuvturks.com
 tuvturks.me
