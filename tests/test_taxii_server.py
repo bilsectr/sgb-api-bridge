@@ -103,10 +103,9 @@ def test_limit_pagination_terminates_and_covers_all():
 
 
 def test_added_after_max_returns_empty():
-    pages = (ROOT / "docs/taxii/api/collections" / COL / "pages.json")
-    import json
-    max_added = json.loads(pages.read_text(encoding="utf-8"))["pages"][0]["max_date_added"]
-    env = client.get(f"/api/collections/{COL}/objects/?added_after={max_added}").json()
+    # added_after artik 'modified' uzerinden -> sayfa max_last_changed'ini kullan
+    max_mod = _PAGES["pages"][0]["max_last_changed"]
+    env = client.get(f"/api/collections/{COL}/objects/?added_after={max_mod}").json()
     assert env["more"] is False
     assert [o for o in env["objects"] if o.get("type") == "indicator"] == []
 
@@ -159,3 +158,58 @@ def test_options_cors():
 
 def test_post_not_allowed():
     assert client.post("/taxii2/").status_code == 405
+
+
+# --- QRadar-simulasyon: added_after = max(modified) cursor ile TAM kapsam ---
+
+def _write_synth_tree(base, n_pages=3, per_page=4):
+    """modified-ASC sirali sentetik koleksiyon yazar (build_taxii ciktisi gibi)."""
+    col = base / "api" / "collections" / "synth" / "objects"
+    col.mkdir(parents=True, exist_ok=True)
+    identity = {"type": "identity",
+                "id": "identity--00000000-0000-4000-8000-000000000000",
+                "modified": "2020-01-01T00:00:00.000Z"}
+    pages_meta, k = [], 0
+    for p in range(1, n_pages + 1):
+        objs, last_mod = [identity], None
+        for _ in range(per_page):
+            k += 1
+            mod = f"2026-01-{k:02d}T00:00:00.000Z"
+            objs.append({"type": "indicator",
+                         "id": f"indicator--{k:08d}-0000-4000-8000-000000000000",
+                         "modified": mod, "created": mod})
+            last_mod = mod
+        is_last = p == n_pages
+        env = {"more": not is_last, "objects": objs}
+        if not is_last:
+            env["next"] = f"{p + 1:04d}"
+        (col / f"page-{p:04d}.json").write_text(_json.dumps(env), encoding="utf-8")
+        pages_meta.append({"page": p, "file": f"page-{p:04d}.json", "count": per_page,
+                           "max_last_changed": last_mod, "max_date_added": last_mod})
+    (base / "api/collections/synth/pages.json").write_text(
+        _json.dumps({"collection_id": "synth", "alias": "synth", "page_size": per_page,
+                     "total_objects": k, "pages": pages_meta}), encoding="utf-8")
+    return k
+
+
+def test_qradar_style_added_after_full_coverage(tmp_path, monkeypatch):
+    """QRadar get_all_objects'i taklit: 'next' cursor'u YOKSAY, added_after'i
+    max(modified) ile ilerlet, len<limit'te dur. modified-sirali agacta TAM kapsam
+    + sonlanma garanti olmali (eski id-sirali + date_added kurgusu burada atlardi)."""
+    total = _write_synth_tree(tmp_path)
+    monkeypatch.setattr(taxii_server, "TAXII_DIR", tmp_path)
+    LIMIT = 3
+    seen, aa, guard = set(), "2025-01-01T00:00:00.000Z", 0
+    while True:
+        guard += 1
+        assert guard < 500, "ilerlemiyor / sonsuz dongu"
+        env = client.get(f"/api/collections/synth/objects/?added_after={aa}&limit={LIMIT}").json()
+        objs = env["objects"]
+        inds = [o for o in objs if o.get("type") == "indicator"]
+        seen |= {o["id"] for o in inds}
+        if len(objs) < LIMIT:          # QRadar per_request dur kosulu
+            break
+        new_aa = max((o["modified"] for o in inds), default=aa)
+        assert new_aa > aa, "cursor ilerlemedi -> atlama/dongu riski"
+        aa = new_aa
+    assert len(seen) == total          # hicbir indicator atlanmadi

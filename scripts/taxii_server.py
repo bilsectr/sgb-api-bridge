@@ -193,11 +193,6 @@ def _match_filters(params) -> tuple[set[str] | None, set[str] | None]:
 # Envelope (objects / manifest) — sayfalama + filtre
 # ---------------------------------------------------------------------------
 
-def _object_added(o: dict) -> str:
-    # objects sayfasinda date_added yok; STIX 'created' = first_seen = date_added.
-    return o.get("created", "")
-
-
 def serve_envelope(request: Request, cid: str, kind: str) -> Response:
     pages_index = read_json(TAXII_DIR / "api" / "collections" / cid / "pages.json")
     if pages_index is None:
@@ -218,9 +213,11 @@ def serve_envelope(request: Request, cid: str, kind: str) -> Response:
             return error_response(400, "Invalid next cursor")
         start_page, start_offset = parsed
     elif added_after:
-        # date_added > T olan ilk sayfa (pages id-ASC ~ date_added artan).
+        # modified > T olan ilk sayfa. Sayfalar modified-ASC -> max_last_changed
+        # monoton; QRadar gibi added_after'i max(modified) ile ilerleten client'lar
+        # atlamasiz gezer.
         idx = next((i for i, pm in enumerate(pages)
-                    if pm.get("max_date_added", "") > added_after), None)
+                    if pm.get("max_last_changed", "") > added_after), None)
         start_page = len(pages) + 1 if idx is None else idx + 1
 
     if start_page > len(pages):
@@ -232,15 +229,15 @@ def serve_envelope(request: Request, cid: str, kind: str) -> Response:
         return error_response(404, "Page not found")
     objects = page.get("objects", [])
 
-    # added_after filtresi (spec: date_added). objects -> created; manifest -> date_added/version.
+    # added_after filtresi: STIX 'modified' uzerinden ("changed after"). Sayfalar
+    # modified-ASC oldugundan QRadar'in max(modified) cursor'i ile tam tutarli.
+    # objects -> modified (identity her zaman kalir); manifest -> version (= modified).
     if added_after:
         if kind == "manifest":
-            objects = [o for o in objects
-                       if o.get("date_added", "") > added_after
-                       or o.get("version", "") > added_after]
+            objects = [o for o in objects if o.get("version", "") > added_after]
         else:
             objects = [o for o in objects
-                       if o.get("type") == "identity" or _object_added(o) > added_after]
+                       if o.get("type") == "identity" or o.get("modified", "") > added_after]
 
     # match[id] / match[type]
     if id_set is not None:

@@ -26,17 +26,22 @@ Koleksiyonlar (connectiontype bazli; SIEM use case kutuphanesi hedefli):
   sgb-other         (OT)
   sgb-all           (hepsi)
 
-Siralama: id ASC (SGB id'leri global monoton artan).
-- Yeni kayit  -> her zaman son sayfaya eklenir; eski sayfalar git diff'inde sabit.
-- Silinen kayit -> aktif listeden cikar, sonraki sayfalar bir indicator shift olur.
-  Saatlik full sync ile silmeler azaltilamiyor ama nadir oldugu icin kabul.
+Siralama: COALESCE(last_changed_utc, first_seen_utc) ASC -> yani STIX 'modified'
+sirasinda. Boylece sayfa metadata'sindaki max_last_changed sayfalar arasinda
+monoton artar ve `added_after=T` sayfalamasi tum koleksiyonu ATLAMADAN gezer.
+Kritik: TAXII client'lari (ozellikle QRadar) `added_after` cursor'ini yanitin
+max(modified)'i ile ilerletir; sayfalar modified sirasinda olmazsa (or. id ASC),
+degismis bir kayit cursor'i ileri sicratip ortadaki kayitlari atlatir.
+- Yeni/degisen kayit -> modified=simdi -> son sayfaya eklenir; onceki sayfalar
+  buyuk olcude sabit (degismeyen kayit yerinde kalir -> git diff dusuk).
+- Silinen kayit -> aktif listeden cikar.
 
 STIX 'modified' alani = indicators.last_changed_utc (sgb_db smart upsert ile
-yalniz icerik gercekten degistiyse tazelenir). Bu sayede degismeyen kayitlar
-icin STIX cikti'si byte-identical kalir -> git diff sifir.
+yalniz icerik gercekten degistiyse tazelenir).
 
-Worker `added_after=T` filtresi icin sayfa metadata'sinda max_last_changed
-tutulur; T'den buyuk max'a sahip sayfalar dondurulur.
+Worker/servis `added_after=T` filtresi icin sayfa metadata'sinda max_last_changed
+tutulur; T'den buyuk max'a sahip sayfalardan baslanir (modified sirali oldugundan
+ileri dogru tutarli ilerler).
 """
 from __future__ import annotations
 
@@ -119,14 +124,16 @@ _SELECT_COLS = (
 
 
 def iter_collection_rows(conn: sqlite3.Connection, ct_code: str | None):
-    """ct_code None ise hepsi (sgb-all). id ASC -> stabil sayfalama."""
+    """ct_code None ise hepsi (sgb-all). modified (last_changed) ASC -> sayfalar
+    arasi max_last_changed monoton; added_after sayfalamasi atlamasiz ilerler."""
+    order = "ORDER BY COALESCE(last_changed_utc, first_seen_utc) ASC, id ASC"
     if ct_code is None:
         cur = conn.execute(
             f"""
             SELECT {_SELECT_COLS}
               FROM indicators
              WHERE removed_at_utc IS NULL AND valid = 1
-             ORDER BY id ASC
+             {order}
             """
         )
     else:
@@ -135,7 +142,7 @@ def iter_collection_rows(conn: sqlite3.Connection, ct_code: str | None):
             SELECT {_SELECT_COLS}
               FROM indicators
              WHERE removed_at_utc IS NULL AND valid = 1 AND connectiontype = ?
-             ORDER BY id ASC
+             {order}
             """,
             (ct_code,),
         )
