@@ -1,1 +1,1 @@
-{"id":"e8e95b7b-7724-5400-b479-7a8c36168d57","title":"SGB Cryptomining","description":"Tarayicidan veya zararlidan cryptomining noktalari.","alias":"sgb-mining","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-mining","title":"SGB Cryptomining","description":"Tarayicidan veya zararlidan cryptomining noktalari.","alias":"sgb-mining","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

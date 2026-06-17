@@ -1,1 +1,1 @@
-{"id":"bd0c3b34-d3c0-5f66-a54c-b35bbc337b22","title":"SGB Phishing","description":"Phishing site / kullanici kandirma URL ve domain'leri.","alias":"sgb-phishing","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-phishing","title":"SGB Phishing","description":"Phishing site / kullanici kandirma URL ve domain'leri.","alias":"sgb-phishing","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

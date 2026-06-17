@@ -1,1 +1,1 @@
-{"id":"37b49322-2c7e-51bb-aab3-384e1460c4ea","title":"SGB Mobile C&C","description":"Mobil zararli C2.","alias":"sgb-mobile-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-mobile-cc","title":"SGB Mobile C&C","description":"Mobil zararli C2.","alias":"sgb-mobile-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

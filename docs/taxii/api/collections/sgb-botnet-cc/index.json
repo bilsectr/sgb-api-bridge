@@ -1,1 +1,1 @@
-{"id":"731586ac-742f-5d6e-b430-3930fedeab96","title":"SGB Botnet C&C","description":"Botnet komuta-kontrol sunuculari (outbound C2 tespiti).","alias":"sgb-botnet-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-botnet-cc","title":"SGB Botnet C&C","description":"Botnet komuta-kontrol sunuculari (outbound C2 tespiti).","alias":"sgb-botnet-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

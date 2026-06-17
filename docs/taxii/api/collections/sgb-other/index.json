@@ -1,1 +1,1 @@
-{"id":"72c38f56-cf01-5a8d-9a4e-a7292fe605a3","title":"SGB Other","description":"Diger / siniflandirilmamis kotucul gostergeler.","alias":"sgb-other","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-other","title":"SGB Other","description":"Diger / siniflandirilmamis kotucul gostergeler.","alias":"sgb-other","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

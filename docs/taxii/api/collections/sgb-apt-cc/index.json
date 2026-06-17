@@ -1,1 +1,1 @@
-{"id":"88f0138f-2488-54dd-936b-f7cfe7161572","title":"SGB APT C&C","description":"APT komuta-kontrol — yuksek oncelikli tehdit.","alias":"sgb-apt-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}
+{"id":"sgb-apt-cc","title":"SGB APT C&C","description":"APT komuta-kontrol — yuksek oncelikli tehdit.","alias":"sgb-apt-cc","can_read":true,"can_write":false,"media_types":["application/stix+json;version=2.1"]}

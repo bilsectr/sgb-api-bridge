@@ -1,4 +1,10 @@
 # SGB API Bridge — calisma zamani Python bagimliliklari.
-# Tek bagimlilik: SGB API'sine HTTP istekleri icin requests.
 # Dependabot (pip ekosistemi) bu dosyayi tarar; CI ve Dockerfile da bunu kullanir.
+
+# SGB API'sine HTTP istekleri (sync.py)
 requests>=2.32.0,<3
+
+# Self-hosted TAXII 2.1 servisi (taxii_server.py). Saf-Python; 3.14-slim'de
+# derleme araci gerekmez (uvicorn minimal: h11; starlette: anyio).
+starlette>=0.40,<1
+uvicorn>=0.30,<1

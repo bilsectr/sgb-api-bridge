@@ -45,10 +45,24 @@ taxii_rebuild() {
   python /app/scripts/build_taxii.py --compact || echo "[entrypoint] build_taxii hata - devam"
 }
 
+# TAXII 2.1 servisi (uvicorn): /taxii2/ + /api/ sorgu semantigini saglar.
+# nginx 127.0.0.1:8081'e proxy'ler. Arka planda calisir; statik agaci lazy okur.
+start_taxii_server() {
+  if [ "$TAXII_ENABLED" != "1" ]; then
+    return 0
+  fi
+  echo "[entrypoint] TAXII servisi baslatiliyor (uvicorn 127.0.0.1:${SGB_TAXII_PORT:-8081})"
+  # 'python -m uvicorn': pip --prefix console-script shebang'ina bagimli degil.
+  python -m uvicorn taxii_server:app \
+    --host 127.0.0.1 --port "${SGB_TAXII_PORT:-8081}" \
+    --workers "${SGB_TAXII_WORKERS:-2}" --no-access-log &
+}
+
 case "$MODE" in
   all-in-one)
-    echo "[entrypoint] all-in-one: nginx + python loop"
+    echo "[entrypoint] all-in-one: nginx + taxii + python loop"
     nginx
+    start_taxii_server
     taxii_rebuild
     if [ "$TAXII_ENABLED" = "1" ]; then
       while :; do
@@ -74,7 +88,8 @@ case "$MODE" in
     fi
     ;;
   serve)
-    echo "[entrypoint] serve: sadece nginx"
+    echo "[entrypoint] serve: nginx + taxii (sync yok)"
+    start_taxii_server
     exec nginx -g 'daemon off;'
     ;;
   sync-once)

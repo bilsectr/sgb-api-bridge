@@ -47,7 +47,6 @@ import os
 import shutil
 import sqlite3
 import sys
-import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -87,11 +86,6 @@ DISCOVERY_DESC = (
 API_ROOT_TITLE = "SGB Default API Root"
 API_ROOT_DESC = "Tek API root altinda connectiontype bazli koleksiyonlar."
 API_ROOT_PATH = "api"
-
-# Collection UUID'leri (deterministik, koleksiyon ID'sinden turetilir).
-def _collection_uuid(cid: str) -> str:
-    return str(uuid.uuid5(_export.STIX_NS, f"taxii-collection:{cid}"))
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -202,9 +196,12 @@ def write_api_root(collection_meta: list[dict]) -> None:
     )
 
 
+# Collection `id` = alias (cid). TAXII 2.1'de koleksiyon URL yolu (`/collections/{id}/`)
+# bu `id` alanindan kurulur; spec'e uygun istemciler (OASIS taxii2client, dolayisiyla
+# QRadar TI) discovery'den gelen `id`yi kullanir. Ayri bir UUID verirsek o yol 404 olur.
 def collection_metadata(cid: str, title: str, desc: str) -> dict:
     return {
-        "id": _collection_uuid(cid),
+        "id": cid,
         "title": title,
         "description": desc,
         "alias": cid,
@@ -326,7 +323,7 @@ def write_collection(
             atomic_write_json(p, data)
 
     pages_index = {
-        "collection_id": _collection_uuid(cid),
+        "collection_id": cid,
         "alias": cid,
         "page_size": page_size,
         "total_objects": total,
