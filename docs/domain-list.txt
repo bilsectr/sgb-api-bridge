@@ -35898,7 +35898,6 @@ aracmuaynetuvtruk.web.app
 aracmuaynetvrk.net
 aracmuaynlerim.xyz
 aracmuaynmtuvrk.net
-aracmuaynmtvrk.net
 aracmuaynmtvruk.net
 aracmuaynntuvrk.net
 aracmuaynsm.net
@@ -132035,7 +132034,6 @@ istnnblasres.net
 istnnblprvbrdanalnd.mooo.com
 istnnblrkkrktn.com
 istnnbmbsvrl.com
-istnnf.net
 istnnmblas.com
 istnr.net
 istnrbdfdsfdsfdsbursad.store
@@ -155920,7 +155918,6 @@ maliyeistrgov-tr765.com
 maliyeistrgov-tr769.com
 maliyeistrgov-tr7l2.com
 maliyeistrgov-tr7l8.com
-maliyeistrgov-tr80.com
 maliyeistrgov-tr820.com
 maliyeistrgov-tr823.com
 maliyeistrgov-tr824.com
@@ -172935,7 +172932,6 @@ odemeyap.site
 odemeyapgecis.info
 odemeyaphizligecis.info
 odemezamanixdsa.com
-odemnrlniz.online
 odenbil-oto-px.com
 odendsibil.online
 odenethizmelterm.com
@@ -176094,7 +176090,6 @@ onlineislemler.app
 onlineislemler.cfd
 onlineislemler.dslmularinizzlayim.net
 onlineislemler.findyourpathtoday.com
-onlineislemler.odemnrlniz.online
 onlineislemler.online
 onlineislemler.org
 onlineislemler.pages.dev
@@ -183383,6 +183378,7 @@ pirantech.net
 pirantech.org
 pirantech.top
 pirantechl.online
+pirantechyaz.online
 piranteclh.com
 piranteclh.net
 piranteclh.org
@@ -199492,7 +199488,6 @@ sabahrkelamlarihosgeldiniz.net
 sabahrklmvkatimx.net
 sabahrq.com
 sabahrun.app
-sabahrxklam.com
 sabahsabah.mizi.plus
 sabahsizlericin.net
 sabahsnsns.net
@@ -227861,7 +227856,6 @@ tiodwlfu.com
 tiogleon.com
 tiogleon.com.tr
 tiogleon.org
-tioouirkiye.online
 tiowafa.ddns.net
 tip-become-pain.com
 tip-want.click
@@ -230672,7 +230666,6 @@ tpbktur.top
 tpbludw.com
 tpc-2.online
 tpc1dt.duckdns.org
-tpc2.online
 tpdprslx.net
 tpdxmkjx.net
 tpdzkl.duckdns.org
@@ -231242,7 +231235,6 @@ tr-l55-polistr.online
 tr-land-web.digital
 tr-laptop.blaze-mobiles.com
 tr-lescon.top
-tr-link-dev-tel.org
 tr-link-e-web-only.org
 tr-link-giris-platform.net
 tr-link-girisyap-web.com
@@ -231854,7 +231846,6 @@ traelyst.dk
 traemsas.com
 traermemermr.net
 traezorlogin.webflow.io
-traf-subem.weebly.com
 traffic-redirect.site
 traffic-refuse.com
 trafficfast.online
@@ -252394,6 +252385,7 @@ www-pasaj.com
 www-paypal.net
 www-paytr.com
 www-pirantech.com
+www-pirantech.net
 www-plt-awm.online
 www-polisi155.online
 www-presidentsoffice-gov-lk.dwnlld.com
