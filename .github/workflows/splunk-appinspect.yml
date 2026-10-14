@@ -27,7 +27,7 @@ jobs:
       matrix:
         app: [TA-sgb-threat-intel, sgb_usecases]
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
